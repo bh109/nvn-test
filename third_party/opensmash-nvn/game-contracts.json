@@ -1,0 +1,83 @@
+{
+  "sdk": {
+    "imageBytes": 13611008,
+    "segments": [
+      {
+        "offset": 0,
+        "flags": 5,
+        "fileBytes": 5507408,
+        "memoryBytes": 5507408,
+        "sha256": "4a16c9c2e16fbaae2ef52387aee428957165495dd41994b1034b06bb3de97298"
+      },
+      {
+        "offset": 5509120,
+        "flags": 4,
+        "fileBytes": 6917288,
+        "memoryBytes": 6917288,
+        "sha256": "0a0a86c480abaf6ecee736ec2e7a144f094a61c43956c7e499613fdcd470d45e"
+      },
+      {
+        "offset": 12427264,
+        "flags": 6,
+        "fileBytes": 401392,
+        "memoryBytes": 1183744,
+        "sha256": "e1346d9f6e431ede0f2bae8d266158568a284d839e66b915c83ab0b2f617a94c"
+      }
+    ],
+    "buildId": "5FD4F531C1195E9E5510C9E73F22CD39612839F8"
+  },
+  "game": {
+    "imageBytes": 121929728,
+    "addresses": [
+      {
+        "reference": 485331534496,
+        "guest": 485331534496,
+        "kind": "code"
+      },
+      {
+        "reference": 485391745088,
+        "guest": 485391746544,
+        "kind": "code"
+      },
+      {
+        "reference": 485391744624,
+        "guest": 485391746080,
+        "kind": "code"
+      },
+      {
+        "reference": 485417956056,
+        "guest": 485417960152,
+        "kind": "data"
+      },
+      {
+        "reference": 485403069096,
+        "guest": 485403073192,
+        "kind": "rodata"
+      }
+    ],
+    "segments": [
+      {
+        "offset": 0,
+        "flags": 5,
+        "fileBytes": 60589120,
+        "memoryBytes": 60589120,
+        "sha256": "1c01b6214895586bc447ef1ed224971694981a7fdf3002845f9e901bec00986d"
+      },
+      {
+        "offset": 60592128,
+        "flags": 4,
+        "fileBytes": 22339424,
+        "memoryBytes": 22339424,
+        "sha256": "0c0839c001779af37d6784f8d5cbdff1bda6cd10b871e15e3ef4190e9d6e968f"
+      },
+      {
+        "offset": 82931712,
+        "flags": 6,
+        "fileBytes": 3745136,
+        "memoryBytes": 38998016,
+        "sha256": "983a1dce7ab5de8996f0325eccfc605cf0e2ba3ae8d4a72d531d379a38d83324"
+      }
+    ],
+    "buildId": "21450C647B8C5940ED5B68218EA128FD3C5D597D"
+  }
+}

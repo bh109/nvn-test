@@ -1,0 +1,10 @@
+{
+  "generator": "Make-ZstdWorkerFixture.py",
+  "zstdVersion": "1.5.7",
+  "level": 3,
+  "blockType": 2,
+  "inputBytes": 1536,
+  "compressedBytes": 581,
+  "payloadSha256": "d957eaf63ee82e741f5afc07ae7f15a58ba772a8972145bd972459952b244b74",
+  "frameSha256": "091782b31176fc8b46c2818614d4ee95bac30c1efa7bf91c4f6e43b19992d608"
+}

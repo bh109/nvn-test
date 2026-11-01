@@ -1,0 +1,142 @@
+{
+  "files": [
+    {
+      "sha256": "1B6FC8A627C26D7ADEF7F75D41AE3B83D970BFF2E37847187288D5809D632154",
+      "path": "runtime/nvn_stub.c"
+    },
+    {
+      "sha256": "4D93208170D1C4B4551BBD319BF22FD55FCCD4BF7F4C3046451B2232553300CB",
+      "path": "runtime/nvn_gl.c"
+    },
+    {
+      "sha256": "B5B85DF50437C3131EE7A42F62C7333E710CE012CD7008A69FBFA8587EAA399E",
+      "path": "runtime/nvn_vk.c"
+    },
+    {
+      "sha256": "9B2421239AA21875B0CC21CB36ACA9DF3CB777C15FF125997E8A693ED202330D",
+      "path": "runtime/nvn_c4.c"
+    },
+    {
+      "sha256": "FD25B8D50501C0682D9E947B2274D5442A607E93626668007BACA6846A1DB180",
+      "path": "runtime/nvn_c5.c"
+    },
+    {
+      "sha256": "DB998EBA4FA17C203AAF473B2C1D1C275B7E4E797B613B9AF6FD8B75616101C6",
+      "path": "runtime/nvn_sdk.c"
+    },
+    {
+      "sha256": "66140D00FD9371589F6B9838454AAFA3FD905F4E122EB62CEA3EFE8E2EC2D6C7",
+      "path": "runtime/mx_translate.c"
+    },
+    {
+      "sha256": "72DB3E6A84A84221C69681506EC04FD9438415628C05D9242DD1FE64B67051AE",
+      "path": "runtime/tex_decode.c"
+    },
+    {
+      "sha256": "D4D6BFC1CCD246CDB2503BA673088D3C477587C2D91B47070029FDCF48B947AB",
+      "path": "runtime/gfx_options.c"
+    },
+    {
+      "sha256": "8162B08CC66665799C9C38C04D7C868936DD0E10372E46DC335D40B51F94199A",
+      "path": "runtime/runtime.h"
+    },
+    {
+      "sha256": "97593992593F8C854D2CAB7A11EA0C106B0B87F185A0553FC1AEBBBC92E45DE5",
+      "path": "runtime/hostrt.h"
+    },
+    {
+      "sha256": "96B3C2945C46735ED209E9822C92F504DEA79A80ECDD982386A1EB5C610E213D",
+      "path": "runtime/mx_translate.h"
+    },
+    {
+      "sha256": "330BB58328F0AF60561DFBE59B6AB0BD18F7B994CEEA48687780ACB33EDA0DD4",
+      "path": "runtime/gfx_options.h"
+    },
+    {
+      "sha256": "387F6F41BDC9563166823E13587636A4AE043BBE9A9B13AE1981E603F56E769F",
+      "path": "runtime/nvn_front.h"
+    },
+    {
+      "sha256": "7F75F8B347C9564A14F873631E6BDC23646181B03B0F2B0494B3B8F0A47C6855",
+      "path": "runtime/tex_decode.h"
+    },
+    {
+      "sha256": "039B7881DD2B51EE60598A79FDD39615AF146E209BFB5A0ECB68446ED7E2AC1C",
+      "path": "runtime/nvn_sdk.h"
+    },
+    {
+      "sha256": "DB707F1E8FC23E4378AC65391765D9B23C1A0E433790D4BE3D8BBDE4B192DA4F",
+      "path": "runtime/nvn_c4.h"
+    },
+    {
+      "sha256": "8A029F5EF07521931C493504B4E1DFCCC747A627D732D9ADCEBE03D47F6681E9",
+      "path": "runtime/nvn_dt.h"
+    },
+    {
+      "sha256": "B3630DF64AACE8FF7726488577A552C968AB78F6F0AEC115E4EBB084E84F7C65",
+      "path": "runtime/nvn_vk_draw.c"
+    },
+    {
+      "sha256": "335A076188D275ECB335111E62841F3932A6E53E3B5891B0FBB685EC882FAE14",
+      "path": "runtime/nvn_c5.h"
+    },
+    {
+      "sha256": "024A2C58A42BDCAFC894BD9E9D4315ECDB8802346A40DCC519502B46DC3DF3EA",
+      "path": "runtime/sdklift.h"
+    },
+    {
+      "sha256": "9D710305887ECB8E9DC57F93FB4AEECFB1144E551B54C1F7CAD2264BD4229DC1",
+      "path": "runtime/mx_ops.h"
+    },
+    {
+      "sha256": "310BAFFD400A06AA55F14D2DE7344612556B84305E9A0ED37B12EA2368C497AC",
+      "path": "runtime/fpexact.h"
+    },
+    {
+      "sha256": "ED1F3DD92048A86578E28002C93A650FD9ED462DAB78243241425A50E6424D18",
+      "path": "runtime/neon.h"
+    },
+    {
+      "sha256": "6EAC53B1EA21071820E48B141CA4C6EA404586E91E34A97A3E1BFDC5822C0252",
+      "path": "runtime/game_data.h"
+    },
+    {
+      "sha256": "6442802C4845D1B7AEEDE4FF9B031464D3C12018596037EC6B54F6A508D9EF04",
+      "path": "runtime/nvn_vk_m4.c"
+    },
+    {
+      "sha256": "8F80E1EE112679988827E6EA769F160F4E24AF258CEC9387DA921FBDD130A596",
+      "path": "runtime/nvn_vk_menu.c"
+    },
+    {
+      "sha256": "51C482779DE3F4026C98B635264712EE9D02513D91BA03262B723ACEA96694C7",
+      "path": "runtime/nvn_vk_flash.c"
+    },
+    {
+      "sha256": "FED5FE05E1860C62E465CDE248CDCB3F4F6E5C36EDCF374E155547A9DEB15428",
+      "path": "runtime/nvn_vk_wd.c"
+    },
+    {
+      "sha256": "B26001099EFB98741BFA918DAB5C4C90A6A097AF9E7490C0A9215FAD4D87FC54",
+      "path": "runtime/nvn_vk_prewarm.h"
+    },
+    {
+      "sha256": "7B3E8A7682C467FE1EDCC0907E4746A5D1F843679583002EEE8DDFC2C7E073EA",
+      "path": "runtime/nvn_vk_store.c"
+    },
+    {
+      "sha256": "B8EFC0BBDEF533AA3C1C243F44011378D52F385F6154E3D7A942442B899813B6",
+      "path": "runtime/menu.h"
+    },
+    {
+      "sha256": "97E0591A29C400731E3E02D395F3D14810E501C3D939346AB278C187B6732281",
+      "path": "runtime/menu_spv.h"
+    },
+    {
+      "sha256": "04DEEE7297C54171171BDBAA6D2A9967A2A0392A05711298517549E0CB61A7F1",
+      "path": "runtime/vk_glslang_shim.c"
+    }
+  ],
+  "origin": "OpenSmash source supplied by the user",
+  "license": "GPL-3.0, see LICENSE; individual file notices retained"
+}
