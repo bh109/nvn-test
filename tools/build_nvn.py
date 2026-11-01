@@ -15,6 +15,9 @@ import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
+# The installer can provision embeddable Python, whose ._pth isolation omits
+# the script directory. Resolve our own modules independently of CWD/PYTHONPATH.
+sys.path.insert(0, str(ROOT / 'tools'))
 GLSLANG_URL = 'https://github.com/KhronosGroup/glslang/releases/download/16.6.0/glslang-16.6.0-windows-x86_64-release.zip'
 GLSLANG_SHA256 = '82bf434e69b9bb4829de7e2b4bc2c5e7a7861e53d66cf75e5cc70f5f694a8d9b'
 GLSLANG_LIBS = ('glslang.lib', 'glslang-default-resource-limits.lib', 'SPIRV-Tools-opt.lib', 'SPIRV-Tools.lib')
@@ -218,7 +221,6 @@ def main(argv=None):
                 if getattr(args, name):
                     command += ['--' + name, getattr(args, name)]
             run(command)
-            import build_game
             # Conservative on fresh 8/16-GB laptops; users can set --jobs.
             jobs = args.jobs or 4
             run([sys.executable, ROOT / 'tools/recomp.py', 'all', 'dump/exefs', '--out', 'build',

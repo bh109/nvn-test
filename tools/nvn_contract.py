@@ -8,10 +8,12 @@ import hashlib
 import json
 from pathlib import Path
 import re
-
-from nso import Module
+import sys
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / 'tools'))  # also works under embeddable Python ._pth isolation
+from nso import Module
+
 CONTRACT = ROOT / 'third_party/opensmash-nvn/game-contracts.json'
 
 
