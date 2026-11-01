@@ -1,5 +1,7 @@
 # Playing
 
+> Inherited WindowSmash reference. For this fork's Windows install/play steps, use [Install NVN](INSTALL-NVN.md). Some sections describe other backends or platforms.
+
 [← README](../README.md) · [Setup guide](BUILDING.md) · [Multiplayer](MULTIPLAYER.md) · [DLC and unlocks](DLC-AND-UNLOCKS.md)
 
 Everything about playing once the game is built: how to start it, the controls, the settings, and where WindowSmash keeps your save, screenshots and problem reports.

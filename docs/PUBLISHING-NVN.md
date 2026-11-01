@@ -43,9 +43,10 @@ installer test results and the original-source audit archive. None is needed
 by the installer. They may be archived outside the project or deleted after
 review. Preserve working builds, saves and warm caches while developing.
 
-Older comparison scripts in `diagnostics/` may expect a separate OpenSmash
-checkout and developer-specific paths. They are optional research tools, not
-part of the install/play path. A player needs no external OpenSmash checkout.
+The [diagnostics index](../diagnostics/README.md) identifies maintained optional
+checks. Obsolete external-renderer comparison scripts and broken LLE audit
+wrappers were removed. Retained context/host checks default to bundled source.
+A player needs no external ssbu-recomp checkout.
 
 ## Before the first push
 
@@ -68,7 +69,8 @@ cold installation on a fresh Windows machine has not yet been qualified.
 
 Current limits: resolution is user-selectable, but stable performance is not
 guaranteed. Full-resolution Training testing averaged about 57.8 FPS on Intel
-and near 60 FPS on AMD; 4K supersampling is not performance-qualified. An Intel
+and near 60 FPS on AMD; the user also reports successful 4K play on AMD, without
+an instrumented 4K benchmark. An Intel
 run also suffered unresolved GPU device loss. Validation-enabled shutdown can
 time out; online delay is not yet classified by peer timing telemetry. Do not
 describe these as resolved.

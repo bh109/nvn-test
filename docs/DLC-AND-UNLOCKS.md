@@ -1,5 +1,7 @@
 # DLC and unlocks
 
+> Inherited WindowSmash reference. For this fork's Windows install/play steps, use [Install NVN](INSTALL-NVN.md). Some sections describe other backends or platforms.
+
 [← README](../README.md) · [Setup guide](BUILDING.md) · [13.0.5 update](UPDATES.md) · [Multiplayer](MULTIPLAYER.md)
 
 Three separate things are involved:

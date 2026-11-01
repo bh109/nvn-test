@@ -1,5 +1,6 @@
-param([Parameter(Mandatory=$true)][string]$ReferenceRoot)
+param([string]$ReferenceRoot='')
 $ErrorActionPreference='Stop';$root=Split-Path $PSScriptRoot -Parent
+if(!$ReferenceRoot){$ReferenceRoot=Join-Path $root 'third_party\opensmash-nvn'}
 $out=Join-Path $root 'build\nvn-host-tests';New-Item -ItemType Directory -Path $out -Force|Out-Null
 $cc=Join-Path $root 'deps\llvm\bin\clang-cl.exe';$sysroot=Join-Path $root 'deps\msvc'
 & $cc /nologo /TC /O2 /W0 /winsysroot $sysroot /I "$ReferenceRoot\runtime" /c "$ReferenceRoot\runtime\nvn_stub.c" "$PSScriptRoot\test_opensmash_host_fixture.c" "/Fo$out\\"

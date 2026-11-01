@@ -9,6 +9,8 @@ WindowSmash or OpenSmash checkout is required by the install/build/play path.
 - Keep AI-HANDOFF-2026-10-28.txt updated after meaningful changes and tests.
 - Read docs/AI-HANDOFF.md for portable continuation context, especially the AMD
   laptop's offline jitter. Keep that summary current without private data.
+- Use docs/DEVELOPMENT-NVN.md and diagnostics/README.md for the current source
+  map and supported developer checks. Upstream platform guides are marked as reference.
 - Preserve the warm NVN cache, saves and working/rollback executable when testing.
 - Use Mario versus Mario, normal Battlefield Training, 1x speed, CPU Stop, both
   0%, starting platforms and menu closed for comparable battle measurements.

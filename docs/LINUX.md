@@ -1,5 +1,7 @@
 # WindowSmash on Linux
 
+> Inherited WindowSmash reference. For this fork's Windows install/play steps, use [Install NVN](INSTALL-NVN.md). Some sections describe other backends or platforms.
+
 [← README](../README.md) · [Setup guide](BUILDING.md) · [Playing](PLAYING.md) · [Multiplayer](MULTIPLAYER.md) · [Technical guide](TECHNICAL.md)
 
 The same recompiled game as the Windows build, as a native x86-64 Linux program. It is

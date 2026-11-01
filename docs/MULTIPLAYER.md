@@ -1,5 +1,7 @@
 # Multiplayer
 
+> Inherited WindowSmash reference. For this fork's Windows install/play steps, use [Install NVN](INSTALL-NVN.md). Some sections describe other backends or platforms.
+
 [← README](../README.md) · [Setup guide](BUILDING.md) · [Playing](PLAYING.md) · [Linux](LINUX.md) · [Technical guide](TECHNICAL.md)
 
 WindowSmash plays the game's **Local Wireless** mode over the internet. To the game, the other players look like Switches nearby. The game's own **Online** mode works too, for Quickplay against WindowSmash's own game server ([Online mode](#online-mode-quickplay)). Nintendo's online service isn't used.

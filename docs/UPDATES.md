@@ -1,5 +1,7 @@
 # The 13.0.5 update
 
+> Inherited WindowSmash reference. For this fork's Windows install/play steps, use [Install NVN](INSTALL-NVN.md). Some sections describe other backends or platforms.
+
 [← README](../README.md) · [Setup guide](BUILDING.md) · [DLC and unlocks](DLC-AND-UNLOCKS.md) · [Technical guide](TECHNICAL.md)
 
 WindowSmash builds and plays one version of the game: **13.0.5**, its last update. Among other things, 13.0.5 adds **Kazuya and Sora** (Challenger Packs 10 and 11), so it has every DLC fighter.

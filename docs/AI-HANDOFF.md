@@ -1,4 +1,4 @@
-# AI continuation handoff — 2026-11-01
+# AI continuation handoff — 2026-11-02
 
 Read this first, then the root `AGENTS.md`. This is the portable continuation
 summary. The ignored root `AI-HANDOFF-2026-10-28.txt` is a longer chronological
@@ -7,6 +7,21 @@ Update this document after meaningful changes, preserving the distinction betwee
 reported observations, measured evidence and untested hypotheses.
 
 ## Current objective
+
+The user now reports laptop 2 runs without issues even at 4K. Record this as
+successful user testing, not an instrumented 4K benchmark or proof that the Intel
+problems are a hardware limit. Preserve the unresolved Intel device-loss record.
+
+Repository cleanup: README is now a short Windows NVN install/play tutorial.
+Added docs/DEVELOPMENT-NVN.md and diagnostics/README.md; inherited platform/backend
+guides are labeled as upstream reference. Removed three obsolete external graphics
+probes and four audit-game wrappers that invoked missing Test-NativeVulkanGame.ps1.
+No production references to those scripts were found. Retained contract verifiers,
+fixtures, adapter checks, build tools, shared renderer code and upstream licenses.
+Context/host diagnostic defaults now use the bundled vendor source; both checks
+compiled and passed. No full game rebuild needed for this cleanup. Raw local
+evidence and the old README/scripts are archived in ignored diagnostics/cleanup-20261102.
+Working executable, settings, caches and saves are unchanged by the cleanup.
 
 Resolution/performance settings are now part of the normal NVN application,
 requested for community use. Esc -> Graphics / performance offers 0.5x (960x540),
@@ -28,8 +43,9 @@ Vulkanfailures. The normal executable was updated after a hash-verified rollback
 copy of the previous executable/dependencies/metadata was retained locally under
 build/nvn-opensmash-port/rollback-before-resolution-<timestamp>. Server settings,
 warm cache and saves were not copied over. No in-game menu visual/click/restart
-verification yet. No4K
-performance qualification. Source tests are not claims of cross-hardware stability.
+verification by the agent. Laptop 2's successful 4K use is now user-reported;
+there is no instrumented 4K performance qualification. Source tests are not claims
+of cross-hardware stability.
 
 The many experimental BAT launchers were removed. Unproven constant-upload cache,
 CPU scopes, core-affinity comparisons and trace helpers are archived locally under
@@ -63,8 +79,8 @@ compiled objects, shader caches or log conclusions.
 
 | Machine | Hardware | User-reported behavior |
 |---|---|---|
-| Laptop 1, original development PC | Intel Core i5-1240P, Iris Xe, 16 GB RAM | Offline play is smooth. |
-| Laptop 2, new continuation PC | AMD Ryzen 7 PRO 8840HS, Radeon 780M, 32 GB RAM | Offline logs have now been inspected: large hitches correlate with first-use shader/pipeline work and fall substantially with a warm cache. Smaller pacing variation remains unattributed. See the measured runs below. |
+| Laptop 1, original development PC | Intel Core i5-1240P, Iris Xe, 16 GB RAM | Earlier reduced-resolution play was smooth; full resolution has variable performance and unresolved device loss. |
+| Laptop 2, AMD development PC | AMD Ryzen 7 PRO 8840HS, Radeon 780M, 32 GB RAM | Warm-cache full-resolution logs are near 60 FPS; user now reports successful play even at 4K. First-use shader hitches remain possible. |
 
 - Public-server ICMP round trips were roughly 242–321 ms. These measurements
   describe the public host, not the actual direct peer path during a match.
@@ -92,18 +108,18 @@ symptom. Average 60 FPS does not rule out uneven frame timing or simulation stal
    - `build/nvn-opensmash-port/play.stderr.log`
    Save a local copy of relevant evidence under an ignored dated diagnostics
    folder. Never commit raw logs or machine/game data.
-2. Check the actual Vulkan adapter and driver in startup output. The launcher
-   still has “Intel” in its name, but selects generic NVN/Vulkan, physical device
-   index 0 and scale 0.5; its name does not force an Intel driver. Confirm the
+2. Check the actual Vulkan adapter and driver in startup output. The GPU-neutral
+   launcher selects NVN/Vulkan, physical device index 0, and the saved resolution
+   (default 0.5 when unset). Confirm the
    renderer is actually using the Radeon 780M. Collect the AMD driver version
    if the logs do not expose it clearly.
 3. Inspect `nvn_perf`, `nvn_vk_perf`, shader/pipeline hold counters, worker/cache
    messages and any errors. Distinguish battle windows from menus, loading and
    victory screens. One laptop's logs cannot establish the other's behavior.
-4. If needed, have the user run the same offline Mario vs Mario matchup on normal
-   Battlefield, CPU level 3, with the same rules, moving/attacking for a few
-   minutes. Repeat the same scene with the existing cache warm. This was the
-   suggested comparison; it is not an already certified benchmark.
+4. If needed, use the AGENTS.md fixed Training scene: Mario vs Mario on normal
+   Battlefield, speed 1×, CPU Stop, both at 0%, menu closed. Repeat with the
+   existing cache warm. Test moving/attacking separately from that stationary
+   baseline, rather than mixing both workloads into one comparison.
 5. Compare spikes with shader/pipeline work. If warmed offline play still
    jitters, investigate local CPU/GPU frame pacing, scheduling, power/thermal
    behavior and driver-specific costs. Do not change drivers or settings blindly.
