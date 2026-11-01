@@ -134,6 +134,52 @@ launcher disables full-screen startup preparation (`SSBU_VK_PREP=0`,
 
 ## Recent fixes and evidence
 
+- AMD laptop offline evidence captured on 2026-11-01, before and after one
+  warm-cache repeat of the comparable Mario-versus-Mario Battlefield Training
+  scene. Raw logs were copied only to ignored dated `diagnostics/local-amd-*`
+  folders; do not publish them. Both runs selected the Radeon 780M through
+  Vulkan 1.4.325, driver token `0x0080016c`, and shut down with zero Vulkan call
+  failures. This confirms the launcher name did not select an Intel adapter.
+- The first preserved run measured 12,228 battle frames at 58.5 FPS: present
+  spacing median 16.60 ms, p99 21.44 ms, maximum 808.97 ms, with 41 frames over
+  33.4 ms. Fourteen stage libraries compiled on the render thread in fight
+  frames, costing 2,798.1 ms. In all, draw-time holds cost 4,371 ms; the longest
+  was 285.3 ms. The run added 187 stage-library cache misses and saved a larger
+  AMD pipeline cache. This is direct evidence that incomplete first-use cache
+  coverage caused severe offline hitches in that run.
+- The immediate warm-cache repeat measured 15,688 battle frames at 59.9 FPS:
+  present spacing median 16.63 ms, p99 20.26 ms, maximum 309.83 ms, with only one
+  frame over 33.4 ms. Render-thread fight compilation fell to two libraries and
+  146.5 ms; draw-time holds fell to 294 ms total. The two new stage-library
+  cache misses coincide with the late run's only major hitch window. The cache
+  was not rewritten because only two creations had been added, below the
+  current save threshold of eight.
+- The staging adaptation now changes that exit policy to skip rewriting only
+  when zero new driver-cache entries were created. On this laptop, serializing
+  and writing the roughly 92 MB cache in the first run took about 362 ms total
+  on the exit path; repeating a 146.5 ms in-fight miss on every launch is a
+  worse trade. The pinned vendor file and its manifest hash remain unchanged;
+  the policy change is recorded by `Stage-OpenSmashGraphics.ps1` like the other
+  local adaptations. Rebuild and perform one more warm-cache repeat to verify
+  that the two late entries are saved and absent on the following launch.
+  Runtime-only staging, contract/hash validation, compilation and linking all
+  passed on the AMD laptop after this change. The verification run measured
+  12,606 battle frames at 60.0 FPS: present spacing median 16.64 ms, p99
+  20.02 ms, maximum 37.05 ms, with two frames over 33.4 ms. No stage library
+  compiled or waited on the render thread in a fight, and first-drawn pipelines
+  cost 0.00 ms there. The run saved two new cache entries at exit; cache
+  serialization plus writing took about 207 ms, with no frame gap caused by the
+  exit save. This confirms the large reported offline hitches were cache-warming
+  effects on the newly built AMD installation for this tested scene. It does
+  not prove every stage/effect is warmed or that all smaller pacing variation
+  has been eliminated.
+- Therefore sustained GPU overload is not supported by these logs, while cache
+  coverage is the dominant measured cause of the large hitches. Do not claim
+  all AMD jitter is fixed: the warm run still had 214 battle frames over 20 ms,
+  no GPU timestamp data was enabled, and the smaller residual pacing variation
+  has not yet been attributed. Also note the first run opened a 1920x1080
+  swapchain and the warm repeat opened 1280x720, so the comparison is strongest
+  for compile/hold correlation rather than resolution-sensitive GPU cost.
 - `dca3c19`: fixed sibling imports under embeddable Python's isolated `._pth`
   configuration. Both `build_nvn.py` and `nvn_contract.py` add their own tools
   directory to `sys.path`; removed an unused `import build_game`. Two regression

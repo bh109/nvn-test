@@ -53,6 +53,12 @@ $textStart='static void ovl_text(uint32_t index, int x, int y, int dot, const ch
 Replace-Checked 'nvn_vk_draw.c' $textStart ($textStart+"`n    image_barrier(V.images[index], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);") 'Order overlay text after earlier swapchain image writes; glyph runs within this call are disjoint'
 $oskBlit='    vkCmdBlitImage(R.cmd, g_osk.img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, V.images[index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &b, VK_FILTER_LINEAR);'
 Replace-Checked 'nvn_vk_draw.c' $oskBlit ("    image_barrier(V.images[index], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);`n"+$oskBlit) 'Order optional keyboard overlay after the game image'
+$pcacheThreshold='        if (have_file && !marker && added < 8 && !(e && !strcmp(e, "always"))) {      /* under 8 new entries: not worth 0.9 GB of writing (run s14prep1: 1 entry = 11 s of exit); they are made again next time, a few ms */'
+$pcacheThresholdFixed='        if (have_file && !marker && added < 1 && !(e && !strcmp(e, "always"))) {      /* Preserve every new driver-cache entry: even one AMD stage-library miss can stall a battle for tens of milliseconds. */'
+Replace-Checked 'nvn_vk_m4.c' $pcacheThreshold $pcacheThresholdFixed 'Persist even a small number of expensive driver-cache misses instead of repeating fight hitches next launch'
+$pcacheSkipLog='            printf("nvn_vk: pipeline cache NOT rewritten at exit: %lld creations were added since %s (under 8: not worth rewriting the file; SSBU_VK_PCSAVE=always writes it anyway)\n", (long long)added, g_pc_dirty_saved ? "the last save of this run" : "it was read at start");'
+$pcacheSkipLogFixed='            printf("nvn_vk: pipeline cache NOT rewritten at exit: no creations were added since %s (SSBU_VK_PCSAVE=always writes it anyway)\n", g_pc_dirty_saved ? "the last save of this run" : "it was read at start");'
+Replace-Checked 'nvn_vk_m4.c' $pcacheSkipLog $pcacheSkipLogFixed 'Describe the zero-new-entry cache-save policy accurately'
 $overlayStart='static void overlay_draw(uint32_t index) {'
 $overlayTest=@'
     /* Explicit regression mode: exercise overlapping track/fill on every present,
