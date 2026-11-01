@@ -976,7 +976,11 @@ static void print_status(void) {
     fiber_counts(&fiber_slots, &fibers_finalized, &fibers_made);
     fprintf(stderr, "[status] fibers: %llu started, %u host fibers (%u finalized, kept for the next ones)\n",
             (unsigned long long)fibers_made, fiber_slots, fibers_finalized);
-    kernel_dump_threads();
+    /* A full guest-thread dump holds the kernel lock while writing many lines.  It is
+     * useful diagnostically, but can make a live 60 Hz session miss a frame when logs
+     * are redirected.  Crash/freeze reports use their own thread-state paths and are
+     * unaffected.  Keep the historical default; production launchers may opt out. */
+    if (!(getenv("SSBU_STATUS_THREADS") && !atoi(getenv("SSBU_STATUS_THREADS")))) kernel_dump_threads();
     fflush(stderr);
 }
 

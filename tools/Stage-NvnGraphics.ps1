@@ -59,6 +59,23 @@ Replace-Checked 'nvn_vk_m4.c' $pcacheThreshold $pcacheThresholdFixed 'Persist ev
 $pcacheSkipLog='            printf("nvn_vk: pipeline cache NOT rewritten at exit: %lld creations were added since %s (under 8: not worth rewriting the file; SSBU_VK_PCSAVE=always writes it anyway)\n", (long long)added, g_pc_dirty_saved ? "the last save of this run" : "it was read at start");'
 $pcacheSkipLogFixed='            printf("nvn_vk: pipeline cache NOT rewritten at exit: no creations were added since %s (SSBU_VK_PCSAVE=always writes it anyway)\n", g_pc_dirty_saved ? "the last save of this run" : "it was read at start");'
 Replace-Checked 'nvn_vk_m4.c' $pcacheSkipLog $pcacheSkipLogFixed 'Describe the zero-new-entry cache-save policy accurately'
+$gapRecord='            g_fr_wall[frame] = t_prev ? (float)((double)(t_now - t_prev) * 1000.0 / (double)fq.QuadPart) : 0.0f;'
+$gapRecordFixed=@'
+            g_fr_wall[frame] = t_prev ? (float)((double)(t_now - t_prev) * 1000.0 / (double)fq.QuadPart) : 0.0f;
+            {   /* WindowSmash: bounded attribution for long battle presentation gaps; off unless SSBU_VK_GAPLOG=<ms>. */
+                static int gap_ms = -1, gap_lines;
+                if (gap_ms < 0) gap_ms = getenv("SSBU_VK_GAPLOG") ? atoi(getenv("SSBU_VK_GAPLOG")) : 0;
+                if (battle && t_prev && gap_ms > 0 && g_fr_wall[frame] >= (float)gap_ms && gap_lines++ < 100) {
+                    double k = 1000.0 / (double)fq.QuadPart;
+                    printf("nvn_vk_gap: frame %lld: %.2f ms between presents = %.2f before present job + %.2f present job (hold %.2f, pictures %.2f, previous queue-present %.2f, acquire %.2f, blit %.2f, submit %.2f, queue-present %.2f, front-end %.2f, reports %.2f)\n",
+                           (long long)frame, (double)(t_now - t_prev) * k, (double)(t_present - t_prev) * k, (double)(t_now - t_present) * k,
+                           (double)(tp[0] - t_present) * k, (double)(tp[1] - tp[0]) * k, (double)(tp[2] - tp[1]) * k,
+                           (double)(tp[7] - tp[2]) * k, (double)(tp[3] - tp[7]) * k, (double)(tp[4] - tp[3]) * k,
+                           (double)(tp[5] - tp[4]) * k, (double)(tp[6] - tp[5]) * k, (double)(t_now - tp[6]) * k);
+                }
+            }
+'@
+Replace-Checked 'nvn_vk_draw.c' $gapRecord $gapRecordFixed 'Add opt-in capped attribution of long battle gaps without enabling broad profiling'
 $overlayStart='static void overlay_draw(uint32_t index) {'
 $overlayTest=@'
     /* Explicit regression mode: exercise overlapping track/fill on every present,

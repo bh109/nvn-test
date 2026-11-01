@@ -135,6 +135,34 @@ launcher disables full-screen startup preparation (`SSBU_VK_PREP=0`,
 
 ## Recent fixes and evidence
 
+- AMD full-resolution follow-up on 2026-11-02 used the laptop's warm cache,
+  1920x1080 internal rendering, and the controlled Mario-versus-Mario scene.
+  With experimental options and profiling off, 12,616 battle frames averaged
+  59.9 FPS: median present spacing 16.64 ms, p99 22.33 ms, maximum 53.30 ms,
+  with 15 frames over 33.4 ms. There was no fight-time stage compilation or
+  waiting. A repeat with only Vulkan timestamps enabled measured GPU time at
+  6.07 ms median, 8.26 ms p99 and 8.65 ms maximum, ruling out raw GPU saturation
+  for this scene; presentation pacing remained similar.
+- A new opt-in, capped `SSBU_VK_GAPLOG=<ms>` staging adaptation attributed long
+  battle gaps without enabling broad profiling. A warm full-resolution run
+  measured 8,560 battle frames at 60.0 FPS, GPU p99 7.27 ms, and only two gaps
+  over 33.4 ms. Both were periodic and almost entirely before Vulkan work:
+  frame 9279 was 33.59 ms (32.63 ms before the 0.96 ms present job), and frame
+  9879 was 34.54 ms (33.57 ms before the 0.97 ms present job). They were exactly
+  600 frames apart and immediately followed the runtime's 10-second `[status]`
+  report and guest-thread dump.
+- `print_status()` writes the guest-thread dump while holding the kernel lock.
+  `SSBU_STATUS_THREADS=0` now suppresses only that expensive periodic detail,
+  retaining the lightweight status counters; the NVN production launcher sets
+  it. Crash/freeze diagnostics use separate paths and remain intact. A subsequent
+  full-resolution run covered 18,729 battle frames and 37 ten-second reports:
+  all 37 retained the lightweight fiber/status line, none emitted guest-thread
+  detail, and the repeatable 600-frame gaps disappeared. That run did contain
+  one unrelated 391.03 ms pre-present hitch while warming 12 previously unseen
+  stage-library cache entries (including a 177 ms fight-thread compilation);
+  the expanded warm cache was saved cleanly at exit. The periodic status hitch
+  is therefore fixed, but first-seen content can still cause cache-warming
+  hitches and should not be described as general jitter being eliminated.
 - Naming cleanup: the GPU-neutral launcher is `Play WindowSmash NVN.bat`.
   Production launch/staging scripts are now `tools/Run-NvnGame.ps1` and
   `tools/Stage-NvnGraphics.ps1`. Developer diagnostics are

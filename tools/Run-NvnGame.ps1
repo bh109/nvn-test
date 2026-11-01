@@ -9,7 +9,7 @@ $values=@{
     SSBU_GRAPHICS_CONFIG="$out\graphics.ini";SSBU_VK_CACHE=$cache;SSBU_NVN_REPORT_DIR="$out\reports";
     SSBU_MENU='0';SSBU_L1_PIPE='0';SSBU_L1_EARLY='0';SSBU_RUNAHEAD='0';SSBU_PACE_COUNTWAIT='0';
     SSBU_VK_PREP='0';SSBU_VK_LOAD_AT_START='0';SSBU_VK_NOHOLD='0';SSBU_VK_SELFTEST='0';
-    SSBU_WATCHDOG='0';SSBU_NVN_EXIT_FRAME=$(if($Live){'0'}else{[string]$ExitFrame});
+    SSBU_WATCHDOG='0';SSBU_STATUS_THREADS='0';SSBU_NVN_EXIT_FRAME=$(if($Live){'0'}else{[string]$ExitFrame});
     SSBU_SHOT=$(if($Live){'0'}else{[string]$ShotFrame});SSBU_SHOT_DIR="$out\screenshots"
 }
 if(!(Test-Path -LiteralPath "$out\graphics.ini")){
