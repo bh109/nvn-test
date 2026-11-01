@@ -1,8 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "online_menu.h"
 #include "online_settings.h"
+#include "graphics_settings.h"
 #include <shellapi.h>
 #include <cstdio>
+#include <cstdlib>
 extern "C" {
 #include "settings.h"
 void net_status(char *,size_t);
@@ -10,11 +12,15 @@ void net_status(char *,size_t);
 
 namespace {
 HWND panel, server_mode, server_edit, name_edit, direct_check, status_label;
+HWND resolution_mode, resolution_status;
+double custom_resolution=0.5;
+const char *resolution_values[]={"0.5","0.75","1.0","2.0"};
+constexpr int resolution_count=sizeof resolution_values/sizeof resolution_values[0];
 std::string custom_server;
 HFONT font;
 UINT dpi=96;
 volatile LONG opened;
-enum { SAVE=100, SERVER_MODE, HOST_SERVER };
+enum { SAVE=100, SERVER_MODE, HOST_SERVER, SAVE_RESOLUTION };
 const char *public_server="smash.recomps.wtf:39421";
 HWND control(const char *kind,const char *label,DWORD style,int x,int y,int w,int h,int id=0) {
     HWND item=CreateWindowExA(0,kind,label,WS_CHILD|WS_VISIBLE|style,MulDiv(x,dpi,96),MulDiv(y,dpi,96),MulDiv(w,dpi,96),MulDiv(h,dpi,96),panel,
@@ -38,6 +44,39 @@ void change_server_mode() {
     }
     EnableWindow(server_edit,!use_public);
 }
+void load_resolution() {
+    double running=0.5;
+    const char *environment=getenv("SSBU_VK_SCALE");
+    if(environment)nvn_graphics::resolution_scale(environment,running);
+    double saved=running;
+    char text[128]={};
+    if(settings_ini_get("nvn_graphics.ini",nullptr,"resolution_scale",text,sizeof text))
+        nvn_graphics::resolution_scale(text,saved);
+    SendMessageW(resolution_mode,CB_RESETCONTENT,0,0);
+    for(const char *label:{"Performance - 960 x 540 (0.5x)","Balanced - 1440 x 810 (0.75x)","Full resolution - 1920 x 1080 (1x)","4K supersampling - 3840 x 2160 (2x)"})
+        SendMessageA(resolution_mode,CB_ADDSTRING,0,(LPARAM)label);
+    int selected=-1;
+    for(int i=0;i<resolution_count;i++)if(std::fabs(saved-std::atof(resolution_values[i]))<0.000001)selected=i;
+    if(selected<0){
+        custom_resolution=saved;
+        snprintf(text,sizeof text,"Custom saved scale - %.3gx",saved);
+        SendMessageA(resolution_mode,CB_ADDSTRING,0,(LPARAM)text);selected=resolution_count;
+    }
+    SendMessageW(resolution_mode,CB_SETCURSEL,selected,0);
+    snprintf(text,sizeof text,"Running now: %.3gx (%d x %d)",running,(int)(1920*running+0.5),(int)(1080*running+0.5));
+    SetWindowTextA(resolution_status,text);
+}
+void save_resolution() {
+    int selected=(int)SendMessageW(resolution_mode,CB_GETCURSEL,0,0);
+    if(selected<0 || selected>resolution_count)return;
+    char custom[32];snprintf(custom,sizeof custom,"%.6g",custom_resolution);
+    const char *value=selected<resolution_count?resolution_values[selected]:custom;
+    if(!settings_ini_set("nvn_graphics.ini",nullptr,"resolution_scale",value)){
+        MessageBoxA(panel,"Could not save resolution. Check that the project folder is writable.","Save failed",MB_ICONERROR);return;
+    }
+    fprintf(stderr,"[NVN graphics] saved resolution scale %s; next launch\n",value);
+    MessageBoxA(panel,"Resolution saved. Close the game and reopen it with Play WindowSmash NVN.bat to apply the change.","Resolution saved",MB_OK);
+}
 void load_settings() {
     char text[512]={};
     if (!settings_line_read("online_server.txt",text,sizeof text)) snprintf(text,sizeof text,"%s",public_server);
@@ -50,6 +89,7 @@ void load_settings() {
     text[0]=0;settings_line_read("online_name.txt",text,sizeof text);SetWindowTextA(name_edit,text);
     text[0]=0;settings_line_read("online_direct.txt",text,sizeof text);
     SendMessageW(direct_check,BM_SETCHECK,_strnicmp(text,"off",3)?BST_CHECKED:BST_UNCHECKED,0);
+    load_resolution();
 }
 void save_settings() {
     char server[512],name[128];
@@ -111,8 +151,13 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
         control("STATIC","Current connection (updates every second):",0,18,223,590,20);
         status_label=control("STATIC","",SS_LEFT,18,246,590,80);
         control("STATIC","A local server has its own players/ratings. Other laptops use the host's LAN IP.\nFor an Asia internet lobby, run the server on a reachable machine in Asia.\nSave settings, then close and reopen the game. Esc closes this window.",0,18,329,590,62);
-        control("BUTTON","Save for next start",BS_DEFPUSHBUTTON|WS_TABSTOP,18,407,270,30,SAVE);
-        control("BUTTON","Close",WS_TABSTOP,470,407,138,30,IDCANCEL);
+        control("STATIC","Graphics / performance",0,18,402,590,22);
+        resolution_mode=control("COMBOBOX","",CBS_DROPDOWNLIST|WS_TABSTOP|WS_VSCROLL,18,430,370,140);
+        control("BUTTON","Save resolution",WS_TABSTOP,400,430,208,28,SAVE_RESOLUTION);
+        resolution_status=control("STATIC","",0,18,465,590,20);
+        control("STATIC","Higher resolution is sharper and uses more GPU time and memory.\nResolution changes apply after closing and reopening the game.",0,18,491,590,38);
+        control("BUTTON","Save Online settings",BS_DEFPUSHBUTTON|WS_TABSTOP,18,545,270,30,SAVE);
+        control("BUTTON","Close",WS_TABSTOP,470,545,138,30,IDCANCEL);
         load_settings();refresh_status();SetTimer(h,1,1000,nullptr);return 0;
     case WM_TIMER: if(nvn_online_menu_open())refresh_status();return 0;
     case WM_COMMAND:
@@ -120,6 +165,7 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
         case SAVE: save_settings();break;
         case SERVER_MODE: if(HIWORD(w)==CBN_SELCHANGE)change_server_mode();break;
         case HOST_SERVER: start_server();break;
+        case SAVE_RESOLUTION: save_resolution();break;
         case IDCANCEL: SendMessageW(h,WM_CLOSE,0,0);break;
         }return 0;
     case WM_CLOSE: ShowWindow(h,SW_HIDE);InterlockedExchange(&opened,0);SetForegroundWindow(GetWindow(h,GW_OWNER));return 0;
@@ -135,8 +181,8 @@ void nvn_online_menu_toggle(HWND owner) {
         cls.hCursor=LoadCursor(nullptr,IDC_ARROW);cls.hbrBackground=(HBRUSH)(COLOR_BTNFACE+1);cls.lpszClassName=L"WindowSmash-NVN-Online";
         RegisterClassW(&cls);
         UINT owner_dpi=GetDpiForWindow(owner);if(!owner_dpi)owner_dpi=96;
-        RECT rectangle={0,0,MulDiv(630,owner_dpi,96),MulDiv(458,owner_dpi,96)};AdjustWindowRectExForDpi(&rectangle,WS_CAPTION|WS_SYSMENU,FALSE,WS_EX_CONTROLPARENT,owner_dpi);
-        panel=CreateWindowExW(WS_EX_CONTROLPARENT,cls.lpszClassName,L"WindowSmash NVN Vulkan - Online settings",WS_CAPTION|WS_SYSMENU,
+        RECT rectangle={0,0,MulDiv(630,owner_dpi,96),MulDiv(594,owner_dpi,96)};AdjustWindowRectExForDpi(&rectangle,WS_CAPTION|WS_SYSMENU,FALSE,WS_EX_CONTROLPARENT,owner_dpi);
+        panel=CreateWindowExW(WS_EX_CONTROLPARENT,cls.lpszClassName,L"WindowSmash NVN Vulkan - Settings",WS_CAPTION|WS_SYSMENU,
             CW_USEDEFAULT,CW_USEDEFAULT,rectangle.right-rectangle.left,rectangle.bottom-rectangle.top,owner,nullptr,cls.hInstance,nullptr);
         if(!panel){MessageBoxA(owner,"Could not create Online settings window.","WindowSmash NVN",MB_ICONERROR);return;}
     }

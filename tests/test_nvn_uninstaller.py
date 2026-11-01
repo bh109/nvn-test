@@ -20,6 +20,7 @@ class UninstallTests(unittest.TestCase):
         shutil.copyfile(ROOT / 'tools/nvn_common.ps1', self.root / 'tools/nvn_common.ps1')
         (self.root / 'tools/build_nvn.py').touch()
         (self.root / 'Install WindowSmash NVN.bat').touch()
+        (self.root / 'nvn_graphics.ini').write_text('resolution_scale = 1.0\n')
         for directory in ('build', 'deps', 'cache', 'dump', 'save'):
             (self.root / directory).mkdir()
             (self.root / directory / 'sentinel.txt').write_text('retain during tests')
@@ -36,6 +37,7 @@ class UninstallTests(unittest.TestCase):
         self.assertIn('Recycle: ' + str(self.root / 'build'), result.stdout)
         self.assertNotIn('Recycle: ' + str(self.root / 'save'), result.stdout)
         self.assertNotIn('Recycle: ' + str(self.root / 'dump'), result.stdout)
+        self.assertNotIn('Recycle: ' + str(self.root / 'nvn_graphics.ini'), result.stdout)
         self.assertTrue((self.root / 'build/sentinel.txt').is_file())
 
     def test_optional_data_is_only_in_explicit_plan(self):
@@ -43,6 +45,7 @@ class UninstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('Recycle: ' + str(self.root / 'save'), result.stdout)
         self.assertIn('Recycle: ' + str(self.root / 'dump'), result.stdout)
+        self.assertIn('Recycle: ' + str(self.root / 'nvn_graphics.ini'), result.stdout)
         self.assertTrue((self.root / 'save/sentinel.txt').is_file())
 
     def test_original_input_overlap_rejected_before_mutation(self):

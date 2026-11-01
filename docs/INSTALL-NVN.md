@@ -30,8 +30,14 @@ longer; subsequent starts reuse the cache. Keep the project folder in place.
 ## Logs and retries
 
 For lobby selection, hosting and connection status, see [NVN networking](ONLINE-NVN.md).
-The NVN build has an Esc Online settings window, independent of the disabled
-upstream graphics overlay menu.
+The NVN build has an Esc settings window, independent of the disabled upstream
+graphics overlay menu. Its graphics section offers Performance (960×540), Balanced
+(1440×810), Full resolution (1920×1080), and 4K supersampling (3840×2160).
+Higher settings need more GPU time and memory. Click **Save resolution**, then close
+and reopen the game. The running resolution is shown separately; changing the
+selection does not resize live GPU resources. Resolution is saved locally in
+`nvn_graphics.ini`; rebuilding preserves it. Developer `-ResolutionScale` arguments
+override this setting for that run. Online settings have their own save button.
 
 If setup stops, read **install-nvn.log**, correct the reported problem and run
 the same installer again. Runtime compiler/linker logs are under

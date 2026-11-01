@@ -56,6 +56,9 @@ try{
     $new+=Compile-Unit 'port_gpu' "$root\runtime\gpu.c" @('/TC','/arch:AVX2','/DSSBU_NATIVE_COMPUTE_BATCH')
     $new+=Compile-Unit 'port_vi' "$root\runtime\ipc_vi.c" @('/TC','/DSSBU_NVN_CLOCK_BRIDGE')
     $new+=Compile-Unit 'port_kernel' "$root\runtime\kernel.c" @('/TC')
+    # Runtime-only rebuilds must include host status changes, rather than link a
+    # stale common host.obj from the previous full game build.
+    $new+=Compile-Unit 'port_host' "$root\runtime\host.c" @('/TC','/arch:AVX2','-mfma','-mf16c','-fno-strict-aliasing','/clang:-ffp-contract=off')
     $entry='void f_7109454d90(Cpu *c) {'
     $bootstrapFiles=@(Get-ChildItem -LiteralPath "$root\build\sdk" -Filter 'g*.c' -File | Where-Object {Select-String -LiteralPath $_.FullName -SimpleMatch $entry -Quiet})
     if($bootstrapFiles.Count -ne 1){throw 'Expected exactly one generated SDK bootstrap definition'}
@@ -64,7 +67,7 @@ try{
     [IO.File]::WriteAllText("$out\sdk_nvn_bootstrap.c",$sdk.Replace($entry,'void nvn_sdk_bootstrap_original(Cpu *c) {'))
     $new+=Compile-Unit 'sdk_nvn_bootstrap' "$out\sdk_nvn_bootstrap.c" @('/TC','/I',"$root\build\sdk")
     $bootstrapPattern=[regex]::Escape('\sdk\'+$bootstrapFiles[0].BaseName+'.obj')+'"?$'
-    $objects=@(Get-Content -LiteralPath $response | Where-Object {$_ -notmatch '\\(gpu|gpu_d3d11|gpu_overlay|gpu_menu|ipc_vi|kernel)\.obj"?$' -and $_ -notmatch $bootstrapPattern})+$new
+    $objects=@(Get-Content -LiteralPath $response | Where-Object {$_ -notmatch '\\(host|gpu|gpu_d3d11|gpu_overlay|gpu_menu|ipc_vi|kernel)\.obj"?$' -and $_ -notmatch $bootstrapPattern})+$new
     foreach($object in $objects){if(!(Test-Path -LiteralPath $object.Trim('"'))){throw "Missing link input: $object"}}
     [IO.File]::WriteAllLines("$out\game.rsp",$objects)
     $next=Join-Path $out 'ssbu-nvn-vulkan-next.exe'

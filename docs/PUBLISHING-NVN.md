@@ -33,7 +33,7 @@ The root `.gitignore` excludes these. They can stay on the developer's PC:
 | `build/`, `deps/`, `cache/` | Generated executables, objects, compiler/downloads and shader caches. Setup recreates these. |
 | `save/`, `save_backups/` | Personal progress. |
 | `screenshots/`, `reports/`, captures and logs | Personal images, diagnostics and crash dumps. |
-| `controllers.ini`, `display.ini`, launcher settings | Per-PC preferences. |
+| `controllers.ini`, `display.ini`, `nvn_graphics.ini`, launcher settings | Per-PC preferences. |
 | `online_name.txt`, `netplay_id.txt`, `netplay_address.txt` | Personal identity and network settings. |
 | `version.txt`, module lists and generated version folders | Results of local game preparation. |
 | `AI-HANDOFF*.txt`, dated diagnostic notes/report directories | Local development history; may include paths and private session details. |
@@ -66,6 +66,9 @@ wizard and test install, controller input, Training, normal exit and a rebuild.
 The existing machine has passed runtime rebuild and launch checks, but a full
 cold installation on a fresh Windows machine has not yet been qualified.
 
-Current limits: performance evidence is at 0.5 resolution scale on the tested
-Intel laptop; validation-enabled shutdown can time out; online delay is not yet
-classified by peer timing telemetry. Do not describe these as resolved.
+Current limits: resolution is user-selectable, but stable performance is not
+guaranteed. Full-resolution Training testing averaged about 57.8 FPS on Intel
+and near 60 FPS on AMD; 4K supersampling is not performance-qualified. An Intel
+run also suffered unresolved GPU device loss. Validation-enabled shutdown can
+time out; online delay is not yet classified by peer timing telemetry. Do not
+describe these as resolved.

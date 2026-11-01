@@ -13,7 +13,10 @@ logs, supported game version and development details. This variant keeps
 WindowSmash networking and uses pinned, bundled OpenSmash graphics source.
 To remove a local installation, use **Uninstall WindowSmash NVN.bat**; it keeps
 saves and prepared game data unless you choose to remove them.
-Press **Esc** for Online settings and connection status. To host a nearby lobby,
+Press **Esc** for resolution/performance presets, Online settings and connection status.
+Choose Performance (960×540), Balanced (1440×810), Full resolution (1920×1080),
+or 4K supersampling (3840×2160),
+click **Save resolution**, then close and reopen the game to apply it. To host a nearby lobby,
 click **Start server on this PC** there; see [NVN networking](docs/ONLINE-NVN.md).
 
 Use the NVN guide above for this fork. The inherited documentation below also

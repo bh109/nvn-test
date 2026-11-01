@@ -19,6 +19,7 @@
 # This PC's settings, written on the first start (docs/PLAYING.md)
 /controllers.ini
 /display.ini
+/nvn_graphics.ini
 /launcher.ini
 /online_direct.txt
 # Crash, freeze and stop reports with their minidumps (docs/PLAYING.md)

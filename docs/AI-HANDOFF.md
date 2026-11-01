@@ -8,7 +8,49 @@ reported observations, measured evidence and untested hypotheses.
 
 ## Current objective
 
-Continue on the second, AMD laptop to identify and reduce **offline jitter**.
+Resolution/performance settings are now part of the normal NVN application,
+requested for community use. Esc -> Graphics / performance offers 0.5x (960x540),
+0.75x (1440x810), 1x (1920x1080), and 2x/4K supersampling (3840x2160). Saving
+resolution is independent of Online settings and applies next launch through
+Play WindowSmash NVN.bat. Root-local nvn_graphics.ini is ignored/preserved across
+rebuilds and removed only with the uninstaller's explicit personal-data option.
+Without a saved choice, scale remains0.5. Developer ResolutionScale overrides
+the saved choice for that run. Custom valid scales0.25..2.0 are preserved.
+
+The normal builder compiles fresh runtime/host.c as port_host.obj instead of
+linking a stale common host.obj during runtime-only rebuilds. This includes the
+f69a2d9 status fix in runtime-only builds. Graphics parsing/launcher precedence,
+locale handling, environment restoration and settings-preservation tests passed;
+uninstaller tests passed. The first menu candidate compiled/linked and completed
+300 startup frames with clean shutdown/zero Vulkan failures. A clean production
+build compiled/linked and completed180 startupframes with clean shutdown/zero
+Vulkanfailures. The normal executable was updated after a hash-verified rollback
+copy of the previous executable/dependencies/metadata was retained locally under
+build/nvn-opensmash-port/rollback-before-resolution-<timestamp>. Server settings,
+warm cache and saves were not copied over. No in-game menu visual/click/restart
+verification yet. No4K
+performance qualification. Source tests are not claims of cross-hardware stability.
+
+The many experimental BAT launchers were removed. Unproven constant-upload cache,
+CPU scopes, core-affinity comparisons and trace helpers are archived locally under
+ignored diagnostics/local-intel-20261102, not part of the production patch.
+No experimental GPU timestamps, split submissions or constant-cache feature is
+enabled. Existing working executable is retained as a local rollback when updating
+the normal application. Never publish executables/caches/game data/settings/logs.
+
+Intel full-resolution follow-up: a clean fixed Training run with the status fix
+averaged57.8FPS across10,835battleframes (median16.87ms,p9926.40ms,max36.06ms),
+6frames>33.4ms, negligible shader holds and clean exit. CPU affinity AB repeated
+normal55.69/fast-only58.88/normal59.20/fast-only59.01FPS: no repeatable benefit;
+normal affinity restored. Private memory stayed~8.627GB in that fixed scene;
+low available RAM alone did not explain drops or establish a leak/hardware ceiling.
+A later plain Intel run suffered VK_ERROR_DEVICE_LOST around46,425frames with
+profiling/experimental options off and normal affinity. It was visibly presenting,
+shader workers idle and locks free. This is unresolved, not proven laptop fault.
+WPR capture was canceled during save; no usable CPU trace exists. Keep first-use
+shader hitches, periodic status hitches, sustained variation and device loss distinct.
+
+Continue identifying and reducing **offline jitter** where measurements justify it.
 The user wants implementation backed by measurements and explanations, rather
 than repeated speculative tests. Preserve the smooth NVN graphics path, the
 installer, controller support and WindowSmash networking.

@@ -1,11 +1,24 @@
-param([switch]$Live,[switch]$Online,[int]$ExitFrame=120,[int]$TimeoutSeconds=240,[int]$ShotFrame=20,[ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$LogTag='play',[string]$BuildDirectory='build\nvn-opensmash-port',[string]$CacheDirectory='')
+param([switch]$Live,[switch]$Online,[int]$ExitFrame=120,[int]$TimeoutSeconds=240,[int]$ShotFrame=20,[ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$LogTag='play',[string]$BuildDirectory='build\nvn-opensmash-port',[string]$CacheDirectory='',[ValidateRange(0.25,2.0)][double]$ResolutionScale=0.5)
 $ErrorActionPreference='Stop';$root=Split-Path $PSScriptRoot -Parent
 $out=if([IO.Path]::IsPathRooted($BuildDirectory)){$BuildDirectory}else{Join-Path $root $BuildDirectory};$exe=Join-Path $out 'ssbu-nvn-vulkan.exe'
 $cache=if($CacheDirectory){[IO.Path]::GetFullPath((Join-Path $root $CacheDirectory))}else{Join-Path $out 'cache'}
+if(!$PSBoundParameters.ContainsKey('ResolutionScale')){
+    $resolutionSettings=Join-Path $root 'nvn_graphics.ini'
+    if(Test-Path -LiteralPath $resolutionSettings){
+        foreach($line in (Get-Content -LiteralPath $resolutionSettings)){
+            if($line -match '^\s*resolution_scale\s*=\s*([^;#]+)'){
+                [double]$savedScale=0
+                if([double]::TryParse($Matches[1].Trim(),[Globalization.NumberStyles]::Float,[Globalization.CultureInfo]::InvariantCulture,[ref]$savedScale) -and $savedScale -ge 0.25 -and $savedScale -le 2.0){$ResolutionScale=$savedScale}
+                break
+            }
+        }
+    }
+}
 if(!(Test-Path -LiteralPath $exe)){throw 'Run Install WindowSmash NVN.bat first to build the game.'}
-if(Get-Process ssbu-nvn-vulkan -ErrorAction SilentlyContinue){throw 'Close the existing NVN Vulkan game before starting another run; it shares the candidate cache.'}
+if(Get-Process ssbu-nvn-vulkan -ErrorAction SilentlyContinue){throw 'Close the existing NVN Vulkan game before starting another run; it shares the shader cache.'}
 $values=@{
-    SSBU_NVN_FRONTEND='opensmash';SSBU_RENDERER='vk';SSBU_VK_DEVICE='0';SSBU_VK_SCALE='0.5';
+    SSBU_NVN_FRONTEND='opensmash';SSBU_RENDERER='vk';SSBU_VK_DEVICE='0';SSBU_VK_SCALE=$ResolutionScale.ToString('0.########',[Globalization.CultureInfo]::InvariantCulture);
+    SSBU_VK_GPUTIME='0';SSBU_VK_PASSTIME='0';SSBU_VK_SPLIT='0';
     SSBU_GRAPHICS_CONFIG="$out\graphics.ini";SSBU_VK_CACHE=$cache;SSBU_NVN_REPORT_DIR="$out\reports";
     SSBU_MENU='0';SSBU_L1_PIPE='0';SSBU_L1_EARLY='0';SSBU_RUNAHEAD='0';SSBU_PACE_COUNTWAIT='0';
     SSBU_VK_PREP='0';SSBU_VK_LOAD_AT_START='0';SSBU_VK_NOHOLD='0';SSBU_VK_SELFTEST='0';
@@ -33,7 +46,7 @@ try{
     $stdout=Join-Path $out "$LogTag.stdout.log";$stderr=Join-Path $out "$LogTag.stderr.log"
     $process=Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $root -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $processHandle=$process.Handle # keep a handle so Windows PowerShell retains ExitCode
-    Write-Host "WindowSmash NVN Vulkan started, PID $($process.Id). Logs: $out"
+    Write-Host "WindowSmash NVN Vulkan started, PID $($process.Id), resolution scale $($values.SSBU_VK_SCALE). Logs: $out"
     if($Live){return}
     $deadline=[DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     while(!$process.WaitForExit(1000)){if([DateTime]::UtcNow -ge $deadline){Stop-Process -Id $process.Id;throw "NVN game exceeded bounded timeout; inspect $stdout and $stderr"}}

@@ -64,7 +64,7 @@ try {
     if ($RemovePreparedData) { $names += @('dump', 'version.txt', 'module_bases.txt', 'last_version.txt') }
     if ($RemoveUserData) {
         $names += @('save', 'save_backups', 'screenshots', 'reports', 'captures',
-            'controllers.ini', 'display.ini', 'launcher.ini', 'online_name.txt',
+            'controllers.ini', 'display.ini', 'nvn_graphics.ini', 'launcher.ini', 'online_name.txt',
             'netplay_id.txt', 'netplay_address.txt', 'online_direct.txt')
     }
     # Saved installer inputs are protected even if someone placed them in a
