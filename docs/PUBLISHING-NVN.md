@@ -6,7 +6,8 @@ then run **Install WindowSmash NVN.bat**. See [installation](INSTALL-NVN.md).
 
 ## Include
 
-- `Install WindowSmash NVN.bat` and `Play Intel NVN Vulkan.bat`.
+- `Install WindowSmash NVN.bat`, `Play Intel NVN Vulkan.bat` and
+  `Uninstall WindowSmash NVN.bat`.
 - `runtime/`, `tools/`, `third_party/`, `tests/`, `docs/` and `launchers/`.
 - The source scripts and fixtures in `diagnostics/`. In particular,
   `Stage-OpenSmashGraphics.ps1` is required by the builder and

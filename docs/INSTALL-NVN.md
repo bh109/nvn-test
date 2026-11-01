@@ -60,6 +60,32 @@ Installer options include `-Game`, `-Keys`, `-Firmware`, `-OnlineName`, `-Jobs`,
 `-NoWizard` and `-SkipBuild`. The last prepares game files without building.
 For example, `-Jobs 2` lowers compilation concurrency on a memory-constrained PC.
 
+## Uninstall
+
+Double-click **Uninstall WindowSmash NVN.bat** and review its removal plan.
+It moves this project's `build/`, `deps/` and `cache/` to the Windows Recycle Bin
+and removes the desktop shortcut only if it points to this installation.
+Close the game first. Source files stay available for a later reinstall.
+
+Prepared game data in `dump/` and saves/personal settings are kept by default.
+The uninstaller asks separately whether to remove those. It never targets the
+original game/keys/firmware folders recorded by setup, and refuses linked paths
+or a removal plan overlapping those inputs. Shared system Python and Microsoft
+Visual C++ installations are retained. Review the Recycle Bin before emptying it
+to reclaim disk space.
+
+Preview without changing anything, from PowerShell:
+
+```powershell
+& '.\Uninstall WindowSmash NVN.bat' -DryRun
+```
+
+For an unattended uninstall, `-Yes` accepts the displayed plan without prompting;
+`-RemovePreparedData` and `-RemoveUserData` explicitly include those data groups.
+To remove the optional installer-created firewall rule too, add
+`-RemoveFirewallRule` from an administrator terminal. It matches both the rule
+name and this installation's executable path; other installations are retained.
+
 ## Development
 
 `tools/build_nvn.py` orchestrates preparation, common CPU recompilation and the
