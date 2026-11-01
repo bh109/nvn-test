@@ -7,6 +7,8 @@ WindowSmash or OpenSmash checkout is required by the install/build/play path.
 - Play: Play Intel NVN Vulkan.bat.
 - Runtime rebuild: tools/build_nvn.py --runtime-only after preparing common objects.
 - Keep AI-HANDOFF-2026-10-28.txt updated after meaningful changes and tests.
+- Read docs/AI-HANDOFF.md for portable continuation context, especially the AMD
+  laptop's offline jitter. Keep that summary current without private data.
 - Preserve the warm NVN cache, saves and working/rollback executable when testing.
 - Use Mario versus Mario, normal Battlefield Training, 1x speed, CPU Stop, both
   0%, starting platforms and menu closed for comparable battle measurements.
