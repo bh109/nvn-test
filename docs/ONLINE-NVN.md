@@ -12,27 +12,32 @@ close and reopen the game. Saving does not move an active match to another serve
 Direct peer connections disclose your IP address to matched peers; disabling
 them routes match traffic through the lobby instead.
 
-Use an IPv4 address or hostname with an explicit port, such as
+Choose **Public lobby** or **Custom server** in the Server selector. Public
+lobby uses the default address and disables address editing. Custom server lets
+you enter an IPv4 address or hostname with an explicit port, such as
 `192.168.100.10:39421`, optionally followed by a lobby code. `off` selects offline
-mode. Use **Public lobby** to restore `smash.recomps.wtf:39421`.
+mode. Selecting **Public lobby** restores `smash.recomps.wtf:39421`.
 
 ## Test two laptops at home
 
-1. On the host laptop, double-click **Host WindowSmash NVN Lobby.bat**. You can
-   also click **Start local Online server** in the Esc panel. Keep the server
+1. On the host laptop, click **Start server on this PC** in the Esc panel. This
+   starts the server, selects Custom server and fills in `127.0.0.1:39421`. Keep the server
    console open. It prints candidate LAN addresses; use the Wi-Fi/Ethernet one,
    not a WSL/VPN/virtual adapter address.
 2. Permit the server's Python process through the host firewall on the intended
    network. If adding rules manually, permit inbound **TCP and UDP 39421**.
    This tool does not change firewall rules or router settings automatically.
-3. In the host game's Esc panel, choose **Use this PC** (`127.0.0.1:39421`),
-   enter a player name and save. Starting the server also fills this address,
-   but you must still save it.
-4. On the second laptop, enter the host's LAN address plus `:39421`, enter a
+3. In the host game's Esc panel, enter a player name and save. The server button
+   fills in the address but does not save settings automatically.
+4. On the second laptop, select **Custom server**, enter the host's LAN address plus `:39421`, enter a
    distinct player name, and save. Both computers must reach each other on
    the home network; guest Wi-Fi isolation may prevent this.
 5. Close and reopen both games using **Play Intel NVN Vulkan.bat**. Match through
    the game's Online mode as usual. Open Esc to check connection/peer status.
+
+For server-only or advanced use, the standalone batch launcher is under
+`launchers/Host WindowSmash NVN Lobby.bat`; normal players can start hosting
+from the Esc panel instead.
 
 Close the host console or press Ctrl+C there to stop hosting. No game files,
 keys or firmware are needed on a server-only machine: the bundled

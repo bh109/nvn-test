@@ -9,11 +9,12 @@ void net_status(char *,size_t);
 }
 
 namespace {
-HWND panel, server_edit, name_edit, direct_check, status_label;
+HWND panel, server_mode, server_edit, name_edit, direct_check, status_label;
+std::string custom_server;
 HFONT font;
 UINT dpi=96;
 volatile LONG opened;
-enum { SAVE=100, PUBLIC_SERVER, LOCAL_SERVER, HOST_SERVER };
+enum { SAVE=100, SERVER_MODE, HOST_SERVER };
 const char *public_server="smash.recomps.wtf:39421";
 HWND control(const char *kind,const char *label,DWORD style,int x,int y,int w,int h,int id=0) {
     HWND item=CreateWindowExA(0,kind,label,WS_CHILD|WS_VISIBLE|style,MulDiv(x,dpi,96),MulDiv(y,dpi,96),MulDiv(w,dpi,96),MulDiv(h,dpi,96),panel,
@@ -25,16 +26,36 @@ void refresh_status() {
     char text[2048]={};net_status(text,sizeof text);
     SetWindowTextA(status_label,*text?text:"Offline. Start the game with Play Intel NVN Vulkan.bat to use Online settings.");
 }
+void change_server_mode() {
+    bool use_public=SendMessageW(server_mode,CB_GETCURSEL,0,0)==0;
+    if(use_public) {
+        if(IsWindowEnabled(server_edit)) {
+            char text[512];GetWindowTextA(server_edit,text,sizeof text);custom_server=text;
+        }
+        SetWindowTextA(server_edit,public_server);
+    } else if(!IsWindowEnabled(server_edit)) {
+        SetWindowTextA(server_edit,custom_server.c_str());
+    }
+    EnableWindow(server_edit,!use_public);
+}
 void load_settings() {
     char text[512]={};
     if (!settings_line_read("online_server.txt",text,sizeof text)) snprintf(text,sizeof text,"%s",public_server);
-    SetWindowTextA(server_edit,text);
+    std::string normalized;
+    bool use_public=nvn_online::server_line(text,normalized) && normalized==public_server;
+    custom_server=use_public?"":text;
+    EnableWindow(server_edit,FALSE);
+    SendMessageW(server_mode,CB_SETCURSEL,use_public?0:1,0);
+    change_server_mode();
     text[0]=0;settings_line_read("online_name.txt",text,sizeof text);SetWindowTextA(name_edit,text);
     text[0]=0;settings_line_read("online_direct.txt",text,sizeof text);
     SendMessageW(direct_check,BM_SETCHECK,_strnicmp(text,"off",3)?BST_CHECKED:BST_UNCHECKED,0);
 }
 void save_settings() {
-    char server[512],name[128];GetWindowTextA(server_edit,server,sizeof server);GetWindowTextA(name_edit,name,sizeof name);
+    char server[512],name[128];
+    if(SendMessageW(server_mode,CB_GETCURSEL,0,0)==0)snprintf(server,sizeof server,"%s",public_server);
+    else GetWindowTextA(server_edit,server,sizeof server);
+    GetWindowTextA(name_edit,name,sizeof name);
     std::string normalized;
     if(!nvn_online::server_line(server,normalized)) {
         MessageBoxA(panel,"Use hostname:port or IPv4:port, optionally followed by a lobby code.\nExample: 192.168.100.10:39421\nUse off for offline mode.","Invalid lobby address",MB_ICONWARNING);return;
@@ -59,9 +80,12 @@ void start_server() {
     if(wcscat_s(powershell,L"\\WindowsPowerShell\\v1.0\\powershell.exe") ||
        swprintf_s(arguments,L"-NoProfile -ExecutionPolicy Bypass -File \"%s\"",script)<0) return;
     if((INT_PTR)ShellExecuteW(panel,L"open",powershell,arguments,root,SW_SHOWNORMAL)<=32) {
-        MessageBoxA(panel,"Could not open the server console. Use Host WindowSmash NVN Lobby.bat instead.","Cannot start server",MB_ICONERROR);return;
+        MessageBoxA(panel,"Could not open the server console. Use launchers/Host WindowSmash NVN Lobby.bat instead.","Cannot start server",MB_ICONERROR);return;
     }
-    SetWindowTextA(server_edit,"127.0.0.1:39421");
+    custom_server="127.0.0.1:39421";
+    EnableWindow(server_edit,FALSE);
+    SendMessageW(server_mode,CB_SETCURSEL,1,0);
+    change_server_mode();
     fprintf(stderr,"[NVN online] local server console requested\n");
 }
 LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
@@ -71,12 +95,15 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
         dpi=GetDpiForWindow(h);if(!dpi)dpi=96;
         font=CreateFontW(-MulDiv(9,dpi,72),0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH,L"Segoe UI");
         control("STATIC","Online / lobby settings",0,18,16,590,22);
-        control("STATIC","Lobby address (host:port, optional lobby code):",0,18,47,590,18);
-        server_edit=control("EDIT","",WS_BORDER|WS_TABSTOP|ES_AUTOHSCROLL,18,69,590,25);
+        control("STATIC","Server",0,18,47,200,18);
+        control("STATIC","Address (host:port, optional lobby code)",0,230,47,378,18);
+        server_mode=control("COMBOBOX","",CBS_DROPDOWNLIST|WS_TABSTOP|WS_VSCROLL,18,69,200,140,SERVER_MODE);
+        SendMessageA(server_mode,CB_ADDSTRING,0,(LPARAM)"Public lobby");
+        SendMessageA(server_mode,CB_ADDSTRING,0,(LPARAM)"Custom server");
+        server_edit=control("EDIT","",WS_BORDER|WS_TABSTOP|ES_AUTOHSCROLL,230,69,378,25);
         SendMessageW(server_edit,EM_SETLIMITTEXT,288,0);
-        control("BUTTON","Public lobby",WS_TABSTOP,18,105,145,28,PUBLIC_SERVER);
-        control("BUTTON","Use this PC",WS_TABSTOP,173,105,145,28,LOCAL_SERVER);
-        control("BUTTON","Start local Online server",WS_TABSTOP,328,105,280,28,HOST_SERVER);
+        control("BUTTON","Start server on this PC",WS_TABSTOP,18,105,280,28,HOST_SERVER);
+        control("STATIC","Opens a server console and selects Custom.\nSave, then restart the game to connect.",0,310,103,298,34);
         control("STATIC","Player name:",0,18,149,115,22);
         name_edit=control("EDIT","",WS_BORDER|WS_TABSTOP|ES_AUTOHSCROLL,135,145,300,25);
         SendMessageW(name_edit,EM_SETLIMITTEXT,32,0);
@@ -91,8 +118,7 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
     case WM_COMMAND:
         switch(LOWORD(w)) {
         case SAVE: save_settings();break;
-        case PUBLIC_SERVER: SetWindowTextA(server_edit,public_server);break;
-        case LOCAL_SERVER: SetWindowTextA(server_edit,"127.0.0.1:39421");break;
+        case SERVER_MODE: if(HIWORD(w)==CBN_SELCHANGE)change_server_mode();break;
         case HOST_SERVER: start_server();break;
         case IDCANCEL: SendMessageW(h,WM_CLOSE,0,0);break;
         }return 0;
@@ -114,7 +140,7 @@ void nvn_online_menu_toggle(HWND owner) {
             CW_USEDEFAULT,CW_USEDEFAULT,rectangle.right-rectangle.left,rectangle.bottom-rectangle.top,owner,nullptr,cls.hInstance,nullptr);
         if(!panel){MessageBoxA(owner,"Could not create Online settings window.","WindowSmash NVN",MB_ICONERROR);return;}
     }
-    load_settings();InterlockedExchange(&opened,1);ShowWindow(panel,SW_SHOW);SetForegroundWindow(panel);SetFocus(server_edit);
+    load_settings();InterlockedExchange(&opened,1);ShowWindow(panel,SW_SHOW);SetForegroundWindow(panel);SetFocus(server_mode);
     fprintf(stderr,"[NVN online] Online settings opened\n");
 }
 int nvn_online_menu_open(){return InterlockedCompareExchange(&opened,0,0)!=0;}
