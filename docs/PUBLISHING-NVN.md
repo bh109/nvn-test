@@ -6,14 +6,13 @@ then run **Install WindowSmash NVN.bat**. See [installation](INSTALL-NVN.md).
 
 ## Include
 
-- `Install WindowSmash NVN.bat`, `Play Intel NVN Vulkan.bat` and
+- `Install WindowSmash NVN.bat`, `Play WindowSmash NVN.bat` and
   `Uninstall WindowSmash NVN.bat`.
 - `launchers/Host WindowSmash NVN Lobby.bat` and its source tools for optional server hosting.
 - `runtime/`, `tools/`, `third_party/`, `tests/`, `docs/` and `launchers/`.
-- The source scripts and fixtures in `diagnostics/`. In particular,
-  `Stage-OpenSmashGraphics.ps1` is required by the builder and
-  `Test-OpenSmashPort.ps1` is required by the Play launcher. Do not exclude the
-  entire diagnostics folder.
+- `tools/Stage-NvnGraphics.ps1` is required by the builder, and
+  `tools/Run-NvnGame.ps1` is required by the Play launcher. Keep the source
+  verification/test scripts and fixtures in `diagnostics/` as development tools.
 - `.gitignore`, `.gitattributes`, `requirements.txt`, `README.md`, `LICENSE`,
   `NOTICE.md`, `AGENTS.md` and the default `online_server.txt`.
 - All vendored licenses, provenance manifests and contract metadata. Contract

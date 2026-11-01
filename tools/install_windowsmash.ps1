@@ -89,6 +89,7 @@ Set-StrictMode -Version Latest
 
 $ScriptBound = $PSBoundParameters   # (this script's own arguments, to start the updated copy with)
 $Root = Split-Path -Parent $PSScriptRoot
+if($Nvn){. "$Root\tools\nvn_common.ps1"}
 if($Nvn){$NoUpdate=$true} # preserve this variant instead of replacing it with upstream DirectX files
 $Script:Python = $null            # the Python command: @(exe) or @('py', '-3')
 $Script:WizardSnapshot = $null    # set to a .png path to have the wizard save a picture of itself and accept (tests)
@@ -1111,7 +1112,7 @@ function Show-Wizard {
         $cb = New-Object Windows.Forms.CheckBox
         $cb.Text = $spec.Text
         $cb.Checked = $spec.On
-        if($Nvn -and $spec.Key -eq 'Shortcut'){$cb.Text='Put a shortcut to Play Intel NVN Vulkan.bat on the desktop'}
+        if($Nvn -and $spec.Key -eq 'Shortcut'){$cb.Text='Put a shortcut to Play WindowSmash NVN.bat on the desktop'}
         if($Nvn -and $spec.Key -eq 'Shaders'){$cb.Text='NVN caches its shaders during loading and play';$cb.Checked=$false;$cb.Enabled=$false}
         $cb.Location = New-Object Drawing.Point(16, $y)
         $cb.Size = New-Object Drawing.Size(728, 24)
@@ -1122,6 +1123,7 @@ function Show-Wizard {
 
     $note = New-Object Windows.Forms.Label
     $note.Text = 'Then the game is built, which takes 30 minutes to a few hours. If it stops, run Install WindowSmash.bat again: it carries on where it stopped.'
+    if($Nvn){$note.Text='Then the game is built, which takes 30 minutes to a few hours. If it stops, run Install WindowSmash NVN.bat again: it carries on where it stopped.'}
     if($Nvn){$note.Text='Build the NVN Vulkan version from your game files. If it stops, run Install WindowSmash NVN.bat again to continue. The first build can take hours.'}
     $note.Location = New-Object Drawing.Point(16, ($y + 4))
     $note.Size = New-Object Drawing.Size(728, 40)
@@ -1277,11 +1279,14 @@ function Step-Extras {
     Write-Step '[8/10] Shortcut and firewall'
     $lnk = Join-Path (Get-DesktopFolder) 'Play SSBU.lnk'
     $play='Play SSBU.bat'
-    if($Nvn){$lnk=Join-Path (Get-DesktopFolder) 'Play WindowSmash NVN.lnk';$play='Play Intel NVN Vulkan.bat'}
+    if($Nvn){$lnk=Join-Path (Get-DesktopFolder) 'Play WindowSmash NVN.lnk';$play='Play WindowSmash NVN.bat'}
     if (-not $Answers.Shortcut) {
         Write-Info 'shortcut: not wanted'
     } elseif (Test-Path -LiteralPath $lnk) {
-        Write-Info "shortcut: already on the desktop"
+        if($Nvn -and (Update-NvnShortcut $lnk $Root -DryRun:$DryRun)){
+            if($DryRun){Write-Would "update this installation's existing shortcut to $play"}
+            else{Write-Info "shortcut: updated to $play"}
+        }else{Write-Info "shortcut: already on the desktop (kept existing target)"}
     } elseif ($DryRun) {
         Write-Would "put $lnk on the desktop, pointing at $play"
     } else {
@@ -1291,6 +1296,7 @@ function Step-Extras {
         $s.WorkingDirectory = $Root
         $s.IconLocation = (Join-Path $Root 'docs\assets\windowsmash.ico') + ',0'
         $s.Description = 'Super Smash Bros. Ultimate (WindowSmash)'
+        if($Nvn){$s.Description='WindowSmash NVN Vulkan'}
         $s.Save()
         Write-Info "shortcut: $lnk"
     }
@@ -1350,7 +1356,7 @@ function Main {
     if($Nvn){$log=Join-Path $Root 'install-nvn.log'}
     try { Start-Transcript -Path $log -Append | Out-Null } catch { }
     try {
-        Write-Host 'WindowSmash setup' -ForegroundColor Cyan
+        if($Nvn){Write-Host 'WindowSmash NVN Vulkan setup' -ForegroundColor Cyan}else{Write-Host 'WindowSmash setup' -ForegroundColor Cyan}
         if($Nvn){Write-Host 'NVN Vulkan variant: pinned vendored source; upstream self-update disabled' -ForegroundColor Cyan}
         Write-Host "  $Root"
         if ($DryRun) { Write-Host '  dry run: saying what each step would do, doing nothing' -ForegroundColor DarkGray }
@@ -1376,7 +1382,7 @@ function Main {
         Step-Shaders $answers $built
         Write-Host ''
         if ($built) {
-            if($Nvn){Write-Host 'Done. Start with Play Intel NVN Vulkan.bat or the Play WindowSmash NVN desktop shortcut.' -ForegroundColor Green}
+            if($Nvn){Write-Host 'Done. Start with Play WindowSmash NVN.bat or the Play WindowSmash NVN desktop shortcut.' -ForegroundColor Green}
             else{Write-Host 'Done. Start the game with Play SSBU.bat, or the shortcut on the desktop.' -ForegroundColor Green}
         } else {
             Write-Host 'Setup done.' -ForegroundColor Green

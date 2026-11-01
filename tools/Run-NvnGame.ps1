@@ -2,7 +2,7 @@ param([switch]$Live,[switch]$Online,[int]$ExitFrame=120,[int]$TimeoutSeconds=240
 $ErrorActionPreference='Stop';$root=Split-Path $PSScriptRoot -Parent
 $out=if([IO.Path]::IsPathRooted($BuildDirectory)){$BuildDirectory}else{Join-Path $root $BuildDirectory};$exe=Join-Path $out 'ssbu-nvn-vulkan.exe'
 $cache=if($CacheDirectory){[IO.Path]::GetFullPath((Join-Path $root $CacheDirectory))}else{Join-Path $out 'cache'}
-if(!(Test-Path -LiteralPath $exe)){throw 'Build the actual NVN port first with Build-OpenSmashPort.ps1.'}
+if(!(Test-Path -LiteralPath $exe)){throw 'Run Install WindowSmash NVN.bat first to build the game.'}
 if(Get-Process ssbu-nvn-vulkan -ErrorAction SilentlyContinue){throw 'Close the existing NVN Vulkan game before starting another run; it shares the candidate cache.'}
 $values=@{
     SSBU_NVN_FRONTEND='opensmash';SSBU_RENDERER='vk';SSBU_VK_DEVICE='0';SSBU_VK_SCALE='0.5';
@@ -33,12 +33,12 @@ try{
     $stdout=Join-Path $out "$LogTag.stdout.log";$stderr=Join-Path $out "$LogTag.stderr.log"
     $process=Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $root -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $processHandle=$process.Handle # keep a handle so Windows PowerShell retains ExitCode
-    Write-Host "Actual NVN port started, PID $($process.Id). Logs: $out"
+    Write-Host "WindowSmash NVN Vulkan started, PID $($process.Id). Logs: $out"
     if($Live){return}
     $deadline=[DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
-    while(!$process.WaitForExit(1000)){if([DateTime]::UtcNow -ge $deadline){Stop-Process -Id $process.Id;throw "NVN port exceeded bounded timeout; inspect $stdout and $stderr"}}
+    while(!$process.WaitForExit(1000)){if([DateTime]::UtcNow -ge $deadline){Stop-Process -Id $process.Id;throw "NVN game exceeded bounded timeout; inspect $stdout and $stderr"}}
     $process.WaitForExit();Get-Content $stderr -Tail 12
-    if($process.ExitCode -ne 0){throw "Actual NVN port exited with code $($process.ExitCode)."}
-    if(!(Select-String -LiteralPath $stderr -SimpleMatch '[NVN port] bounded run completed:' -Quiet)){throw 'NVN port stopped before its requested frame count.'}
-    Write-Host "PASS: actual OpenSmash NVN frontend/Vulkan renderer completed $ExitFrame game frames."
+    if($process.ExitCode -ne 0){throw "WindowSmash NVN Vulkan exited with code $($process.ExitCode)."}
+    if(!(Select-String -LiteralPath $stderr -SimpleMatch '[NVN port] bounded run completed:' -Quiet)){throw 'NVN game stopped before its requested frame count.'}
+    Write-Host "PASS: NVN Vulkan renderer completed $ExitFrame game frames."
 }finally{Pop-Location;foreach($name in $saved.Keys){[Environment]::SetEnvironmentVariable($name,$saved[$name],'Process')}}

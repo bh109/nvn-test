@@ -236,7 +236,7 @@ def main(argv=None):
         if cc.WINSYSROOT:
             command += ['-WindowsSysroot', cc.WINSYSROOT]
         run(command)
-        print('\nDone. Start the game with Play Intel NVN Vulkan.bat. The first cold-cache start can take longer.', flush=True)
+        print('\nDone. Start the game with Play WindowSmash NVN.bat. The first cold-cache start can take longer.', flush=True)
         return 0
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         print(f'\nNVN build stopped: {error}\nRun Install WindowSmash NVN.bat again to continue. See install-nvn.log and the build logs.', file=sys.stderr)

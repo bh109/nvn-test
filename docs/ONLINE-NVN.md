@@ -32,7 +32,7 @@ mode. Selecting **Public lobby** restores `smash.recomps.wtf:39421`.
 4. On the second laptop, select **Custom server**, enter the host's LAN address plus `:39421`, enter a
    distinct player name, and save. Both computers must reach each other on
    the home network; guest Wi-Fi isolation may prevent this.
-5. Close and reopen both games using **Play Intel NVN Vulkan.bat**. Match through
+5. Close and reopen both games using **Play WindowSmash NVN.bat**. Match through
    the game's Online mode as usual. Open Esc to check connection/peer status.
 
 For server-only or advanced use, the standalone batch launcher is under

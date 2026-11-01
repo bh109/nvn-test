@@ -42,7 +42,7 @@ extern "C" int opensmash_display_l1_trace(){return 0;}
 extern "C" int opensmash_display_present_defer(){return 0;}
 extern "C" int opensmash_display_present_due(){return 0;}
 extern "C" void opensmash_display_present_flushed(){}
-extern "C" void opensmash_display_title_note(const char *note){char title[320];snprintf(title,sizeof title,"WindowSmash (NVN Vulkan port)%s%.240s",note&&*note?" - ":"",note?note:"");if(auto window=opensmash::attached_window())SetWindowTextA(window,title);}
+extern "C" void opensmash_display_title_note(const char *note){char title[320];snprintf(title,sizeof title,"WindowSmash NVN Vulkan%s%.240s",note&&*note?" - ":"",note?note:"");if(auto window=opensmash::attached_window())SetWindowTextA(window,title);}
 extern "C" int opensmash_menu_enabled(){return 0;}
 extern "C" int opensmash_menu_frame(int,int,void *){return 0;}
 extern "C" const unsigned char *opensmash_menu_font_rgba(int *,int *){disabled("upstream menu font");return nullptr;}

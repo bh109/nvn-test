@@ -22,7 +22,7 @@ compiled objects, shader caches or log conclusions.
 | Machine | Hardware | User-reported behavior |
 |---|---|---|
 | Laptop 1, original development PC | Intel Core i5-1240P, Iris Xe, 16 GB RAM | Offline play is smooth. |
-| Laptop 2, new continuation PC | AMD Ryzen 7 PRO 8840HS, Radeon 780M, 32 GB RAM | Some jitter occurs even offline. AMD driver version and relevant logs have not yet been inspected. |
+| Laptop 2, new continuation PC | AMD Ryzen 7 PRO 8840HS, Radeon 780M, 32 GB RAM | Offline logs have now been inspected: large hitches correlate with first-use shader/pipeline work and fall substantially with a warm cache. Smaller pacing variation remains unattributed. See the measured runs below. |
 
 - Public-server ICMP round trips were roughly 242–321 ms. These measurements
   describe the public host, not the actual direct peer path during a match.
@@ -36,11 +36,11 @@ compiled objects, shader caches or log conclusions.
   run was **the user intentionally closing the server**. The user explicitly
   confirmed this. It is NOT evidence of the reported jitter.
 
-Cold shader/pipeline preparation on the newly built laptop is plausible, not
-proven. Do not assume the AMD machine is inherently too weak, that RAM is the
-problem, that every hitch is compilation, or that networking explains an offline
-symptom. Average 60 FPS also does not rule out uneven frame timing or simulation
-stalls between otherwise regularly presented frames.
+The measured AMD runs below identify first-use shader/pipeline preparation as
+the dominant cause of the large hitches in the tested scene. This does not
+attribute every remaining hitch. Do not assume the AMD machine is inherently
+too weak, that RAM is the problem, or that networking explains an offline
+symptom. Average 60 FPS does not rule out uneven frame timing or simulation stalls.
 
 ## First actions on laptop 2
 
@@ -78,8 +78,9 @@ persistent jitter issue without preserving it and explaining the comparison.
 ## Working architecture and important source
 
 Repository: `https://github.com/bh109/nvn-test.git`, branch `main`.
-Latest functional code at handoff: `262f17d4d5e58938a5de845a6862b6f622c3cff8`.
-Later commits may update documentation; inspect Git before assuming this is HEAD.
+The AMD cache-save policy landed in `2cb51e3`; the filename/title cleanup described
+below follows it. Inspect Git for the current HEAD rather than using an old
+handoff commit as the latest source.
 
 - Game CPU instructions are statically recompiled locally from owned game files.
 - Original WindowSmash graphics interpreted Tegra/Maxwell commands and rendered
@@ -90,7 +91,7 @@ Later commits may update documentation; inspect Git before assuming this is HEAD
   presented-frame statistics; `optional_adapter.cpp`: deliberately disabled
   upstream features, including `r1_on()` returning 0.
 - `third_party/opensmash-nvn/runtime/`: pinned original handwritten graphics source.
-  `diagnostics/Stage-OpenSmashGraphics.ps1` applies the reviewed adaptations. Its
+  `tools/Stage-NvnGraphics.ps1` applies the reviewed adaptations. Its
   hash gate rejects casual vendor edits; preserve provenance and update changes
   deliberately. Do not bypass it to make a build pass.
 - `runtime/nvn/online_menu.cpp`: native Win32 Esc Online panel, separate from the
@@ -113,7 +114,7 @@ launcher disables full-screen startup preparation (`SSBU_VK_PREP=0`,
 - End-user install/rebuild: `Install WindowSmash NVN.bat`.
 - The current adapter pins the verified 13.0.5 game images and checks segment
   hashes and callback mappings. Do not disable those checks for another version.
-- Play: `Play Intel NVN Vulkan.bat`.
+- Play: `Play WindowSmash NVN.bat`.
 - Developer runtime-only rebuild, after common objects exist:
   `python tools/build_nvn.py --runtime-only` using the checkout's selected Python.
 - Output: `build/nvn-opensmash-port/ssbu-nvn-vulkan.exe`, SDL3 DLL, shader helper,
@@ -133,6 +134,24 @@ launcher disables full-screen startup preparation (`SSBU_VK_PREP=0`,
   Do not use it for this investigation: it would discard useful local evidence.
 
 ## Recent fixes and evidence
+
+- Naming cleanup: the GPU-neutral launcher is `Play WindowSmash NVN.bat`.
+  Production launch/staging scripts are now `tools/Run-NvnGame.ps1` and
+  `tools/Stage-NvnGraphics.ps1`. Developer diagnostics are
+  `diagnostics/Rebuild-NvnRuntime.ps1` and
+  `diagnostics/Test-NvnVulkanValidation.ps1`. Build/cache folder names, executable
+  filename and existing persistent data remain unchanged. The NVN window title
+  and title-note callback use `WindowSmash NVN Vulkan`; legacy LLE diagnostics
+  keep their separate names. Upstream source attribution is retained.
+- Installer upgrades only this checkout's owned legacy desktop shortcut, and the
+  uninstaller recognizes both launcher names. Another checkout's shortcut is
+  never retargeted. Shortcut ownership/dry-run/idempotence tests passed, as did
+  renamed-launcher routing, PowerShell parsing, installer dry-run and existing
+  installer/uninstaller tests. A full runtime candidate was built in a separate
+  ignored `build/nvn-naming-check/` folder; the protected working executable,
+  configuration, saves and caches were not replaced. No title screenshot or live
+  game test was performed for this naming change. Rerunning the installer applies
+  the compiled title change and refreshes the owned desktop shortcut.
 
 - AMD laptop offline evidence captured on 2026-11-01, before and after one
   warm-cache repeat of the comparable Mario-versus-Mario Battlefield Training
@@ -159,7 +178,7 @@ launcher disables full-screen startup preparation (`SSBU_VK_PREP=0`,
   and writing the roughly 92 MB cache in the first run took about 362 ms total
   on the exit path; repeating a 146.5 ms in-fight miss on every launch is a
   worse trade. The pinned vendor file and its manifest hash remain unchanged;
-  the policy change is recorded by `Stage-OpenSmashGraphics.ps1` like the other
+  the policy change is recorded by `Stage-NvnGraphics.ps1` like the other
   local adaptations. Rebuild and perform one more warm-cache repeat to verify
   that the two late entries are saved and absent on the following launch.
   Runtime-only staging, contract/hash validation, compilation and linking all

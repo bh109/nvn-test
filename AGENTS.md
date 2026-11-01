@@ -4,7 +4,7 @@ This folder is the active workspace for NVN development and tests. No sibling
 WindowSmash or OpenSmash checkout is required by the install/build/play path.
 
 - Install/build: Install WindowSmash NVN.bat (tools/build_nvn.py).
-- Play: Play Intel NVN Vulkan.bat.
+- Play: Play WindowSmash NVN.bat.
 - Runtime rebuild: tools/build_nvn.py --runtime-only after preparing common objects.
 - Keep AI-HANDOFF-2026-10-28.txt updated after meaningful changes and tests.
 - Read docs/AI-HANDOFF.md for portable continuation context, especially the AMD

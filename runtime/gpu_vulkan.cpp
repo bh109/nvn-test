@@ -207,7 +207,13 @@ static LRESULT CALLBACK procedure(HWND h,UINT msg,WPARAM w,LPARAM l){
     if(msg==WM_KEYDOWN&&w>=VK_F1&&w<=VK_F6&&!(l&(1<<30)))InterlockedOr(&keys,1<<(w-VK_F1));
     return DefWindowProcW(h,msg,w,l);
 }
-static DWORD WINAPI window_thread(void *event){WNDCLASSW cls={};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.hCursor=LoadCursor(nullptr,IDC_ARROW);cls.lpszClassName=L"ssbu-native-vulkan";RegisterClassW(&cls);window=display_create_window(cls.hInstance,cls.lpszClassName,L"Super Smash Bros. Ultimate (native Vulkan experimental)");SetEvent((HANDLE)event);MSG message;while(GetMessageW(&message,nullptr,0,0)>0){
+static const wchar_t *game_window_title(){
+#ifdef SSBU_OPENSMASH_PORT
+    if(opensmash_port_selected())return L"WindowSmash NVN Vulkan";
+#endif
+    return L"Super Smash Bros. Ultimate (native Vulkan experimental)";
+}
+static DWORD WINAPI window_thread(void *event){WNDCLASSW cls={};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.hCursor=LoadCursor(nullptr,IDC_ARROW);cls.lpszClassName=L"ssbu-native-vulkan";RegisterClassW(&cls);window=display_create_window(cls.hInstance,cls.lpszClassName,game_window_title());SetEvent((HANDLE)event);MSG message;while(GetMessageW(&message,nullptr,0,0)>0){
 #ifdef SSBU_OPENSMASH_PORT
 if(nvn_online_menu_message(&message))continue;
 #endif

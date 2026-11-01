@@ -24,7 +24,7 @@ HWND control(const char *kind,const char *label,DWORD style,int x,int y,int w,in
 }
 void refresh_status() {
     char text[2048]={};net_status(text,sizeof text);
-    SetWindowTextA(status_label,*text?text:"Offline. Start the game with Play Intel NVN Vulkan.bat to use Online settings.");
+    SetWindowTextA(status_label,*text?text:"Offline. Start the game with Play WindowSmash NVN.bat to use Online settings.");
 }
 void change_server_mode() {
     bool use_public=SendMessageW(server_mode,CB_GETCURSEL,0,0)==0;
@@ -136,7 +136,7 @@ void nvn_online_menu_toggle(HWND owner) {
         RegisterClassW(&cls);
         UINT owner_dpi=GetDpiForWindow(owner);if(!owner_dpi)owner_dpi=96;
         RECT rectangle={0,0,MulDiv(630,owner_dpi,96),MulDiv(458,owner_dpi,96)};AdjustWindowRectExForDpi(&rectangle,WS_CAPTION|WS_SYSMENU,FALSE,WS_EX_CONTROLPARENT,owner_dpi);
-        panel=CreateWindowExW(WS_EX_CONTROLPARENT,cls.lpszClassName,L"WindowSmash NVN - Online settings",WS_CAPTION|WS_SYSMENU,
+        panel=CreateWindowExW(WS_EX_CONTROLPARENT,cls.lpszClassName,L"WindowSmash NVN Vulkan - Online settings",WS_CAPTION|WS_SYSMENU,
             CW_USEDEFAULT,CW_USEDEFAULT,rectangle.right-rectangle.left,rectangle.bottom-rectangle.top,owner,nullptr,cls.hInstance,nullptr);
         if(!panel){MessageBoxA(owner,"Could not create Online settings window.","WindowSmash NVN",MB_ICONERROR);return;}
     }

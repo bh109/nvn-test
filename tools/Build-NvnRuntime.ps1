@@ -30,7 +30,7 @@ function Compile-Unit([string]$Name,[string]$File,[string[]]$Flags){
 }
 Push-Location $root
 try{
-    & "$root\diagnostics\Stage-OpenSmashGraphics.ps1" -Python $Python
+    & "$root\tools\Stage-NvnGraphics.ps1" -Python $Python
     if(!$?){throw 'NVN graphics staging failed'}
     & $Python "$root\tools\nvn_contract.py" --output-dir $out
     if($LASTEXITCODE -ne 0){throw 'Unsupported game images for NVN adapter'}

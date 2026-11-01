@@ -20,16 +20,16 @@ $saved=@{};foreach($name in $values.Keys){$saved[$name]=[Environment]::GetEnviro
 try{
     foreach($name in $values.Keys){[Environment]::SetEnvironmentVariable($name,$values[$name],'Process')}
     if($Live){
-        & "$PSScriptRoot\Test-OpenSmashPort.ps1" -Live -LogTag 'validation-battle'
+        & "$root\tools\Run-NvnGame.ps1" -Live -LogTag 'validation-battle'
         Write-Host 'Battle validation game launched OFFLINE. Set the fixed Training scene. Validation adds overhead; this run is for correctness, not FPS. Inspect validation-battle stdout/stderr after closing; launch is not a PASS.'
         return
     }
-    & "$PSScriptRoot\Test-OpenSmashPort.ps1" -ExitFrame 300 -ShotFrame 280 -TimeoutSeconds 240
+    & "$root\tools\Run-NvnGame.ps1" -ExitFrame 300 -ShotFrame 280 -TimeoutSeconds 240
     $game=Join-Path $root 'build\nvn-opensmash-port'
     $text=[IO.File]::ReadAllText("$game\play.stdout.log")+[IO.File]::ReadAllText("$game\play.stderr.log")
     Copy-Item -LiteralPath "$game\play.stdout.log","$game\play.stderr.log" -Destination $out -Force
     if(!$text.Contains('CURRENT-VALIDATION-ENABLED') -or !$text.Contains('Synchronization')){throw 'Khronos core/synchronization activation not verified'}
-    if($text.Contains('Validation Error:')){throw 'Actual NVN port produced Vulkan validation errors; inspect validation logs'}
+    if($text.Contains('Validation Error:')){throw 'NVN Vulkan renderer produced validation errors; inspect validation logs'}
     if($OverlayCheck -and !$text.Contains('nvn_overlay_selftest: 60 overlay frames exercised')){throw 'Overlay regression path was not exercised'}
-    Write-Host 'PASS: actual NVN renderer 300-frame boot with verified Khronos core/synchronization validation and no validation errors.'
+    Write-Host 'PASS: NVN Vulkan renderer 300-frame boot with verified Khronos core/synchronization validation and no validation errors.'
 }finally{foreach($name in $saved.Keys){[Environment]::SetEnvironmentVariable($name,$saved[$name],'Process')}}

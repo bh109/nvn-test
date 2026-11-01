@@ -10,6 +10,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
+. "$PSScriptRoot\nvn_common.ps1"
 
 function Assert-PlainTree([string]$Path) {
     # Inspect ancestors and descendants before recursing: never follow junctions.
@@ -99,7 +100,7 @@ try {
         Assert-PlainTree $shortcut
         $shell = New-Object -ComObject WScript.Shell
         $link = $shell.CreateShortcut($shortcut)
-        $removeShortcut = $link.TargetPath -ieq (Join-Path $root 'Play Intel NVN Vulkan.bat')
+        $removeShortcut = Test-OwnedNvnShortcutTarget $link.TargetPath $root
     }
     foreach ($target in $targets) { Write-Host "Recycle: $target" }
     if ($removeShortcut) { Write-Host "Remove matching shortcut: $shortcut" }
@@ -123,7 +124,7 @@ try {
     }
     if ($removeShortcut) {
         $link = $shell.CreateShortcut($shortcut)
-        if ($link.TargetPath -ieq (Join-Path $root 'Play Intel NVN Vulkan.bat')) { Remove-Item -LiteralPath $shortcut }
+        if (Test-OwnedNvnShortcutTarget $link.TargetPath $root) { Remove-Item -LiteralPath $shortcut }
     }
     # Never remove rules by display name alone: another checkout may share it.
     if ($RemoveFirewallRule) {

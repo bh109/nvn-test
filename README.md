@@ -1,13 +1,13 @@
-# Active NVN development workspace
+# WindowSmash NVN Vulkan
 
-This is the WindowSmash NVN Vulkan variant. Use Install WindowSmash NVN.bat and Play Intel NVN Vulkan.bat here; no sibling checkout is required. See [publishing the source](docs/PUBLISHING-NVN.md) for what belongs in the repository and what stays local.
+This is the WindowSmash NVN Vulkan variant. Use Install WindowSmash NVN.bat and Play WindowSmash NVN.bat here; no sibling checkout is required. See [publishing the source](docs/PUBLISHING-NVN.md) for what belongs in the repository and what stays local.
 
 <p align="center">
   <img src="docs/assets/windowsmash-banner.svg" alt="WindowSmash" width="100%">
 </p>
 
 **NVN Vulkan variant:** double-click **Install WindowSmash NVN.bat** to set up
-and build this variant, then use **Play Intel NVN Vulkan.bat**.
+and build this variant, then use **Play WindowSmash NVN.bat**.
 See [NVN installation and build guide](docs/INSTALL-NVN.md) for prerequisites,
 logs, supported game version and development details. This variant keeps
 WindowSmash networking and uses pinned, bundled OpenSmash graphics source.
@@ -108,7 +108,7 @@ With any other version, the installer says so in red and doesn't build until the
 **For the NVN Vulkan version in this folder, use `Install WindowSmash NVN.bat`.**
 Choose your game files, keys, firmware and online name in its setup window; it
 builds the NVN version and offers its own desktop shortcut. Then launch
-`Play Intel NVN Vulkan.bat`. See the [NVN setup guide](docs/INSTALL-NVN.md).
+`Play WindowSmash NVN.bat`. See the [NVN setup guide](docs/INSTALL-NVN.md).
 
 ### Original DirectX version
 

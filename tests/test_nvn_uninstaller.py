@@ -17,6 +17,7 @@ class UninstallTests(unittest.TestCase):
         self.root = Path(self.temp.name) / 'project'
         (self.root / 'tools').mkdir(parents=True)
         shutil.copyfile(ROOT / 'tools/uninstall_nvn.ps1', self.root / 'tools/uninstall_nvn.ps1')
+        shutil.copyfile(ROOT / 'tools/nvn_common.ps1', self.root / 'tools/nvn_common.ps1')
         (self.root / 'tools/build_nvn.py').touch()
         (self.root / 'Install WindowSmash NVN.bat').touch()
         for directory in ('build', 'deps', 'cache', 'dump', 'save'):

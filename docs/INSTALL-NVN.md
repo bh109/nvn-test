@@ -14,7 +14,7 @@ an earlier experimental executable, a Codex installation or precompiled game obj
 | 5 | Verify the SDK/main segment hashes and NVN callback addresses, then build the bundled graphics source. |
 | 6 | Download SHA256-pinned Khronos glslang libraries and build the shader compiler helper. |
 | 7 | Link the NVN executable and place SDL3 and the compiler helper beside it. Publish only after linking succeeds. |
-| 8 | Start **Play Intel NVN Vulkan.bat**, or use the optional **Play WindowSmash NVN** desktop shortcut. |
+| 8 | Start **Play WindowSmash NVN.bat**, or use the optional **Play WindowSmash NVN** desktop shortcut. |
 
 The helper uses the Microsoft Visual C++ x64 runtime. If it is missing, setup
 downloads the [Microsoft redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe),
@@ -38,20 +38,20 @@ the same installer again. Runtime compiler/linker logs are under
 `build/nvn-opensmash-port/`. A successful rebuild saves the previous executable
 as `ssbu-nvn-vulkan-previous.exe`. An existing playable executable is retained
 if compilation or linking fails. The launcher depends on
-`diagnostics/Test-OpenSmashPort.ps1`; keep it with the project.
+`tools/Run-NvnGame.ps1`; keep it with the project.
 
 From Command Prompt, in the project folder:
 
 ```cmd
 "Install WindowSmash NVN.bat"
-"Play Intel NVN Vulkan.bat"
+"Play WindowSmash NVN.bat"
 ```
 
 From PowerShell:
 
 ```powershell
 & '.\Install WindowSmash NVN.bat'
-& '.\Play Intel NVN Vulkan.bat'
+& '.\Play WindowSmash NVN.bat'
 ```
 
 Preview setup without downloading, showing the wizard or building:
@@ -89,6 +89,11 @@ For an unattended uninstall, `-Yes` accepts the displayed plan without prompting
 To remove the optional installer-created firewall rule too, add
 `-RemoveFirewallRule` from an administrator terminal. It matches both the rule
 name and this installation's executable path; other installations are retained.
+
+After updating from the old Intel-named launcher, rerun the installer to refresh
+this installation's desktop shortcut. It recognizes the former launcher name
+without changing shortcuts that point to another project folder. Prepared data,
+caches and saves are reused; no uninstall is needed.
 
 ## Development
 
