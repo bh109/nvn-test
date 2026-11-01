@@ -30,6 +30,7 @@ int gfx_native_toggle_instance_batch(void);
 #include <functional>
 #ifdef SSBU_OPENSMASH_PORT
 #include "nvn/port_runtime.h"
+#include "nvn/online_menu.h"
 #endif
 
 using namespace nativevk;
@@ -197,8 +198,20 @@ static Slice upload_gpu(uint64_t address,size_t bytes,UploadKind kind=UploadKind
     if(overlay){compute_batch.overlay(slice,guest,bytes);resident_overlay_reads++;resident_overlay_bytes+=bytes;}
     draw_snapshots.store(key,slice);return slice;}
 
-static LRESULT CALLBACK procedure(HWND h,UINT msg,WPARAM w,LPARAM l){LRESULT result;if(display_message(h,msg,w,l,&result))return result;if(msg==WM_CLOSE){fprintf(stderr,"[native Vulkan] window closed\n");gfx_closing();fflush(stderr);ExitProcess(0);}if(msg==WM_KEYDOWN&&w>=VK_F1&&w<=VK_F6&&!(l&(1<<30)))InterlockedOr(&keys,1<<(w-VK_F1));return DefWindowProcW(h,msg,w,l);}
-static DWORD WINAPI window_thread(void *event){WNDCLASSW cls={};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.hCursor=LoadCursor(nullptr,IDC_ARROW);cls.lpszClassName=L"ssbu-native-vulkan";RegisterClassW(&cls);window=display_create_window(cls.hInstance,cls.lpszClassName,L"Super Smash Bros. Ultimate (native Vulkan experimental)");SetEvent((HANDLE)event);MSG message;while(GetMessageW(&message,nullptr,0,0)>0){TranslateMessage(&message);DispatchMessageW(&message);}return 0;}
+static LRESULT CALLBACK procedure(HWND h,UINT msg,WPARAM w,LPARAM l){
+#ifdef SSBU_OPENSMASH_PORT
+    if(opensmash_port_selected() && (msg==WM_APP+77 || (msg==WM_KEYDOWN && w==VK_ESCAPE && !(l&(1<<30))))){nvn_online_menu_toggle(h);return 0;}
+#endif
+    LRESULT result;if(display_message(h,msg,w,l,&result))return result;
+    if(msg==WM_CLOSE){fprintf(stderr,"[native Vulkan] window closed\n");gfx_closing();fflush(stderr);ExitProcess(0);}
+    if(msg==WM_KEYDOWN&&w>=VK_F1&&w<=VK_F6&&!(l&(1<<30)))InterlockedOr(&keys,1<<(w-VK_F1));
+    return DefWindowProcW(h,msg,w,l);
+}
+static DWORD WINAPI window_thread(void *event){WNDCLASSW cls={};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.hCursor=LoadCursor(nullptr,IDC_ARROW);cls.lpszClassName=L"ssbu-native-vulkan";RegisterClassW(&cls);window=display_create_window(cls.hInstance,cls.lpszClassName,L"Super Smash Bros. Ultimate (native Vulkan experimental)");SetEvent((HANDLE)event);MSG message;while(GetMessageW(&message,nullptr,0,0)>0){
+#ifdef SSBU_OPENSMASH_PORT
+if(nvn_online_menu_message(&message))continue;
+#endif
+TranslateMessage(&message);DispatchMessageW(&message);}return 0;}
 static BOOL CALLBACK initialize(PINIT_ONCE,PVOID,PVOID *){
     InitializeCriticalSection(&lock);HANDLE event=CreateEventW(nullptr,TRUE,FALSE,nullptr);HANDLE thread=CreateThread(nullptr,0,window_thread,event,0,nullptr);if(!thread||WaitForSingleObject(event,10000)!=WAIT_OBJECT_0||!window){fprintf(stderr,"[native Vulkan] failed to create game window\n");ExitProcess(1);}CloseHandle(thread);CloseHandle(event);
 #ifdef SSBU_OPENSMASH_PORT
@@ -641,12 +654,23 @@ if(ready&&TryEnterCriticalSection(&lock)){device.save_cache();LeaveCriticalSecti
 extern "C" void gfx_report_compiles(void (*line)(const char *)){line("Native Vulkan: synchronous SPIR-V/pipeline compilation (experimental)");}
 extern "C" int gfx_warm_shaders_main(const char *,const char *){fprintf(stderr,"[native Vulkan] Offline D3D shader warming is unavailable for this backend\n");return 1;}
 extern "C" int gfx_adapter_names(char names[][64],int max){if(max<=0)return 0;if(ready){snprintf(names[0],64,"%s",device.properties.deviceName);return 1;}return 0;}
-// The experimental executable omits the D3D overlay and settings menu. Its
-// normal controller/game input continues through hle_hid.c and display.ini.
-extern "C" int menu_is_open(void){return 0;}
-extern "C" int menu_blocks_input(void){return 0;}
-extern "C" int menu_visible(void){return 0;}
-extern "C" void menu_key(int){fprintf(stderr,"[native Vulkan] settings overlay not implemented; use display.ini\n");}
+// NVN uses a native Online settings window, independent of GPU overlay rendering.
+extern "C" int menu_is_open(void){
+#ifdef SSBU_OPENSMASH_PORT
+return nvn_online_menu_open();
+#else
+return 0;
+#endif
+}
+extern "C" int menu_blocks_input(void){return menu_is_open();}
+extern "C" int menu_visible(void){return menu_is_open();}
+extern "C" void menu_key(int key){
+#ifdef SSBU_OPENSMASH_PORT
+if(key==1 && window && opensmash_port_selected())PostMessageW(window,WM_APP+77,0,0);
+#else
+(void)key;
+#endif
+}
 extern "C" void menu_char(unsigned){}
 extern "C" int menu_frame(int *,int){return 0;}
 extern "C" void menu_draw(float,float){}

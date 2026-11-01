@@ -13,6 +13,8 @@ logs, supported game version and development details. This variant keeps
 WindowSmash networking and uses pinned, bundled OpenSmash graphics source.
 To remove a local installation, use **Uninstall WindowSmash NVN.bat**; it keeps
 saves and prepared game data unless you choose to remove them.
+Press **Esc** for Online settings and connection status. To host a nearby lobby,
+use **Host WindowSmash NVN Lobby.bat**; see [NVN networking](docs/ONLINE-NVN.md).
 
 Use the NVN guide above for this fork. The inherited documentation below also
 describes upstream DirectX, Linux and macOS workflows; those are not the tested

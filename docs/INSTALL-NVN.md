@@ -29,6 +29,10 @@ longer; subsequent starts reuse the cache. Keep the project folder in place.
 
 ## Logs and retries
 
+For lobby selection, hosting and connection status, see [NVN networking](ONLINE-NVN.md).
+The NVN build has an Esc Online settings window, independent of the disabled
+upstream graphics overlay menu.
+
 If setup stops, read **install-nvn.log**, correct the reported problem and run
 the same installer again. Runtime compiler/linker logs are under
 `build/nvn-opensmash-port/`. A successful rebuild saves the previous executable
