@@ -10,7 +10,7 @@ The normal user flow is in the [README](../README.md).
 | Installer / build orchestration | [installer](../tools/install_windowsmash.ps1), [build_nvn.py](../tools/build_nvn.py) |
 | Runtime compilation and linking | [Build-NvnRuntime.ps1](../tools/Build-NvnRuntime.ps1) |
 | Launch settings, resolution, cache and logs | [Run-NvnGame.ps1](../tools/Run-NvnGame.ps1) |
-| Esc settings and resolution validation | [online_menu.cpp](../runtime/nvn/online_menu.cpp), [graphics_settings.h](../runtime/nvn/graphics_settings.h) |
+| Esc settings and resolution validation | [online_menu.cpp](../runtime/nvn/online_menu.cpp), [settings_controls.cpp](../runtime/nvn/settings_controls.cpp), [graphics_settings.h](../runtime/nvn/graphics_settings.h) |
 | NVN host/SDK/context adapters and clock | [runtime/nvn](../runtime/nvn/) |
 | Pinned ssbu-recomp source and licenses | [vendor source](../third_party/opensmash-nvn/) |
 | Reviewed upstream adaptations / hashes | [Stage-NvnGraphics.ps1](../tools/Stage-NvnGraphics.ps1) |
@@ -51,6 +51,24 @@ warm-cache comparison. Never transfer driver caches between GPUs. Runtime-only
 builds compile fresh host code, including status-report fixes.
 
 ## Compare performance fairly
+
+The native Esc menu lives in `runtime/nvn/online_menu.cpp` (Online/resolution)
+and `runtime/nvn/settings_controls.cpp` (display/controllers/game). It uses the
+existing settings and input APIs. `Stage-NvnGraphics.ps1` adds checked hooks for
+the backend's Vulkan device list, optional FPS text and frame-ahead limiter;
+vendored originals remain unchanged. `frame_queue.h` tracks frame submission
+serials, while existing renderer fences enforce the optional limit. Default is
+unchanged. `Restart-NvnGame.ps1` waits for shutdown before relaunching.
+
+Run `py -3 -m unittest tests.test_nvn_settings_menu tests.test_nvn_graphics_settings -v`
+for native-control/file-preservation, remapping, serial-history, launcher and
+restart sequencing checks. The native harness owns its own window/fake pad and
+temporary settings; it does not drive a running game. GPU validation and a manual
+real-pad menu review remain separate from those unit checks.
+
+Developer launcher overrides `-FpsOverlay 0|1|2`, `-FrameQueue 0|1|2|3`,
+`-PresentMode auto|mailbox|fifo|immediate`, and `-GpuIndex -1..15` permit isolated
+tests without editing saved user preferences. `-1` requests automatic GPU selection.
 
 Use Mario versus Mario, normal Battlefield Training, speed 1×, CPU Stop, both at
 0%, menu closed. Keep the window visible. Record resolution, cache state,

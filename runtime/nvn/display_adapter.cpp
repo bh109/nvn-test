@@ -1,5 +1,8 @@
 #include "display_adapter.h"
 #include "present_clock.h"
+#ifdef SSBU_OPENSMASH_PORT
+#include "settings_controls.h"
+#endif
 #include <algorithm>
 #include <cstdio>
 #ifdef SSBU_OPENSMASH_PORT
@@ -57,4 +60,8 @@ extern "C" void opensmash_display_pace(){
     opensmash_port_frame();
 #endif
 }
-extern "C" void opensmash_display_present_done(int){AcquireSRWLockExclusive(&lock);stats.shown++;ReleaseSRWLockExclusive(&lock);}
+extern "C" void opensmash_display_present_done(int){AcquireSRWLockExclusive(&lock);stats.shown++;ReleaseSRWLockExclusive(&lock);
+#ifdef SSBU_OPENSMASH_PORT
+    nvn_settings_presented();
+#endif
+}

@@ -76,6 +76,41 @@ $gapRecordFixed=@'
             }
 '@
 Replace-Checked 'nvn_vk_draw.c' $gapRecord $gapRecordFixed 'Add opt-in capped attribution of long battle gaps without enabling broad profiling'
+# Port settings bridge: reuse the backend's own device list and existing text renderer.
+Replace-Checked 'nvn_vk.c' '        if (forced >= 0 ? (int)i == forced && usable : score > best_score)' '        { void nvn_settings_gpu(int, const char *, int, int); nvn_settings_gpu((int)i, p.deviceName, usable, 0); }
+        if (forced >= 0 ? (int)i == forced && usable : score > best_score)' 'Publish enumerated Vulkan devices to the native settings window without UI-thread Vulkan calls'
+Replace-Checked 'nvn_vk.c' '    V.gpu = gpus[best]; V.family = best_family;' '    { void nvn_settings_gpu(int, const char *, int, int); nvn_settings_gpu(best, "", 1, 1); }
+    V.gpu = gpus[best]; V.family = best_family;' 'Record the running Vulkan device separately from next-launch settings'
+$fpsGuard='    if ((!g_ovl.on && !g_ovl.screen) || g_ovl.thick <= 0) return;'
+$fpsGuardNew=@'
+    char fps_text[160]; int nvn_settings_fps_text(char *, int);
+    int fps_visible = nvn_settings_fps_text(fps_text, sizeof fps_text);
+    int progress_visible = (g_ovl.on || g_ovl.screen) && g_ovl.thick > 0;
+    if (!fps_visible && !progress_visible) return;
+'@
+Replace-Checked 'nvn_vk_draw.c' $fpsGuard $fpsGuardNew 'Allow FPS text independently of shader progress; initialize the shared glyph image before drawing'
+Replace-Checked 'nvn_vk_draw.c' '    if (g_ovl.thick < 8) g_ovl_frames++;' '    if (progress_visible && g_ovl.thick < 8) g_ovl_frames++;' 'Do not count FPS-only overlays as shader-progress frames'
+$fpsDraw='    int W = (int)V.extent.width, H = (int)V.extent.height, th = g_ovl.thick * H / 720, x0 = W / 10, x1 = W - W / 10, y1 = H - H / 40, y0;'
+Replace-Checked 'nvn_vk_draw.c' $fpsDraw ('    if (fps_visible) ovl_text(index, 8, 8, 2, fps_text);
+    if (!progress_visible) return;
+'+$fpsDraw) 'Draw optional FPS only after glyph-image initialization, through the existing barrier-ordered text path'
+$queuePoint='    if (progress) { g_ovl_presents++; return; }'
+$queuePolicy=@'
+    if (progress) { g_ovl_presents++; return; }
+    {   /* Optional GPU frame-ahead cap. Waiting only; no resource lifetime or semaphore changes. */
+        static int limit = -1;
+        static NvnFrameQueue queue;
+        if (limit < 0) { const char *e = getenv("SSBU_NVN_FRAME_QUEUE"); limit = e ? atoi(e) : 0;
+            if (limit < 0 || limit > 3) limit = 0;
+            printf("nvn_vk: GPU frame-ahead cap %d (0 = backend default)\n", limit); }
+        if (limit) { uint64_t serial = nvn_frame_queue_push(&queue, R.serial, limit), completed = R.done;
+            for (int i = 0; i < NSLOT; i++) if (R.slot[i].pending && R.slot[i].serial <= serial) slot_wait(&R.slot[i]);
+            if (completed > R.done) R.done = completed; if (serial > R.done) R.done = serial; }
+    }
+'@
+Replace-Checked 'nvn_vk_draw.c' $queuePoint $queuePolicy 'Optional frame-ahead limiter waits on existing submitted fences; default preserves the original queue policy'
+Replace-Checked 'nvn_vk_draw.c' '#define NSLOT 8' '#include "nvn/frame_queue.h"
+#define NSLOT 8' 'Include the port frame-serial history helper'
 $overlayStart='static void overlay_draw(uint32_t index) {'
 $overlayTest=@'
     /* Explicit regression mode: exercise overlapping track/fill on every present,

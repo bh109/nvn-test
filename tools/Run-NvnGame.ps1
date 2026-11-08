@@ -1,4 +1,4 @@
-param([switch]$Live,[switch]$Online,[int]$ExitFrame=120,[int]$TimeoutSeconds=240,[int]$ShotFrame=20,[ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$LogTag='play',[string]$BuildDirectory='build\nvn-opensmash-port',[string]$CacheDirectory='',[ValidateRange(0.25,2.0)][double]$ResolutionScale=0.5)
+param([switch]$Live,[switch]$Online,[int]$ExitFrame=120,[int]$TimeoutSeconds=240,[int]$ShotFrame=20,[ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$LogTag='play',[string]$BuildDirectory='build\nvn-opensmash-port',[string]$CacheDirectory='',[ValidateRange(0.25,2.0)][double]$ResolutionScale=0.5,[ValidateRange(0,2)][int]$FpsOverlay=0,[ValidateRange(0,3)][int]$FrameQueue=0,[ValidateSet('auto','mailbox','fifo','immediate')][string]$PresentMode='mailbox',[ValidateRange(-1,15)][int]$GpuIndex=0)
 $ErrorActionPreference='Stop';$root=Split-Path $PSScriptRoot -Parent
 $out=if([IO.Path]::IsPathRooted($BuildDirectory)){$BuildDirectory}else{Join-Path $root $BuildDirectory};$exe=Join-Path $out 'ssbu-nvn-vulkan.exe'
 $cache=if($CacheDirectory){[IO.Path]::GetFullPath((Join-Path $root $CacheDirectory))}else{Join-Path $out 'cache'}
@@ -14,10 +14,28 @@ if(!$PSBoundParameters.ContainsKey('ResolutionScale')){
         }
     }
 }
+# Renderer settings are independent of the upstream display.ini clock options.
+$present='mailbox';$gpu='0';$fps='0';$queue='0'
+$settingsFile=Join-Path $root 'nvn_graphics.ini'
+if(Test-Path -LiteralPath $settingsFile){
+    foreach($line in (Get-Content -LiteralPath $settingsFile)){
+        if($line -match '^\s*(present|gpu|fps_overlay|frame_queue)\s*=\s*([^;#]+)'){
+            $key=$Matches[1].ToLowerInvariant();$value=$Matches[2].Trim().ToLowerInvariant()
+            if($key -eq 'present' -and $value -in @('mailbox','fifo','immediate','auto')){$present=$value}
+            if($key -eq 'gpu' -and ($value -eq 'auto' -or $value -match '^([0-9]|1[0-5])$')){$gpu=if($value -eq 'auto'){'-1'}else{$value}}
+            if($key -eq 'frame_queue' -and $value -in @('0','1','2','3')){$queue=$value}
+            if($key -eq 'fps_overlay' -and $value -in @('0','1','2')){$fps=$value}
+        }
+    }
+}
+if($PSBoundParameters.ContainsKey('FpsOverlay')){$fps=[string]$FpsOverlay}
+if($PSBoundParameters.ContainsKey('FrameQueue')){$queue=[string]$FrameQueue}
+if($PSBoundParameters.ContainsKey('PresentMode')){$present=$PresentMode.ToLowerInvariant()}
+if($PSBoundParameters.ContainsKey('GpuIndex')){$gpu=[string]$GpuIndex}
 if(!(Test-Path -LiteralPath $exe)){throw 'Run Install WindowSmash NVN.bat first to build the game.'}
 if(Get-Process ssbu-nvn-vulkan -ErrorAction SilentlyContinue){throw 'Close the existing NVN Vulkan game before starting another run; it shares the shader cache.'}
 $values=@{
-    SSBU_NVN_FRONTEND='opensmash';SSBU_RENDERER='vk';SSBU_VK_DEVICE='0';SSBU_VK_SCALE=$ResolutionScale.ToString('0.########',[Globalization.CultureInfo]::InvariantCulture);
+    SSBU_NVN_FRONTEND='opensmash';SSBU_RENDERER='vk';SSBU_VK_DEVICE=$gpu;SSBU_VK_PRESENT=$(if($present -eq 'auto'){''}else{$present});SSBU_NVN_FPS=$fps;SSBU_NVN_FRAME_QUEUE=$queue;SSBU_VK_SCALE=$ResolutionScale.ToString('0.########',[Globalization.CultureInfo]::InvariantCulture);
     SSBU_VK_GPUTIME='0';SSBU_VK_PASSTIME='0';SSBU_VK_SPLIT='0';
     SSBU_GRAPHICS_CONFIG="$out\graphics.ini";SSBU_VK_CACHE=$cache;SSBU_NVN_REPORT_DIR="$out\reports";
     SSBU_MENU='0';SSBU_L1_PIPE='0';SSBU_L1_EARLY='0';SSBU_RUNAHEAD='0';SSBU_PACE_COUNTWAIT='0';

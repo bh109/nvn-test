@@ -1,10 +1,92 @@
-# AI continuation handoff — 2026-11-02
+# AI continuation handoff — 2026-11-08
 
 Read this first, then the root `AGENTS.md`. This is the portable continuation
 summary. The ignored root `AI-HANDOFF-2026-10-28.txt` is a longer chronological
 archive on the original developer laptop; it is not required on another PC.
 Update this document after meaningful changes, preserving the distinction between
 reported observations, measured evidence and untested hypotheses.
+
+## Latest implementation: expanded Esc settings (2026-11-08)
+
+User requested original-menu features before community release. Local implementation
+adds More settings -> Display / Controllers / Game via settings_controls.cpp.
+Original Online/resolution UI remains. After successful manual testing, the user
+approved the README outline and requested updating and pushing the work.
+
+Display hooks use actual display/input APIs, the backend's Vulkan device enumeration,
+and checked staging adaptations. Presentation preferences map to Vulkan modes, while
+the existing VI 60 Hz game clock remains unchanged. This is not a port of upstream
+Display pacing modes. Optional frame-ahead 1..3 waits on existing submitted fences;
+0 preserves the existing backend policy. It does not replace resource retirement,
+command-buffer rings, semaphore reuse or swapchain-image counts. An earlier statement
+that the drawing backend was single-frame-only was incorrect: it has NSLOT=8.
+
+FPS/details are optional text using the existing Vulkan glyph image/barriers and
+CPU-observed successful presentation-call intervals, not GPU execution times. F1/F2
+toggle temporary state; Display Save persists it. Initialize the glyph image even
+when no shader-progress bar is visible before attempting FPS text drawing.
+Controller remapping captures buttons/triggers, not custom axis/multi-input mappings
+(which remain editable in controllers.ini). Existing input reload applies edits;
+XInput fallback player slots are fixed. Native harness tests use temporary settings
+and fake pad state, with the real hle_settings.c writer and real private Win32 controls.
+They do not automate the running game.
+
+Restart-NvnGame.ps1 waits up to 120 seconds for the old process to exit, then invokes
+the normal launcher with current build/cache directories and Online mode. Inherited
+network overrides are cleared for Online restart so newly saved files count.
+The separate build/nvn-settings-menu candidate was tested first; the normal
+executable is now updated with a hash-verified rollback (details below). Local
+server address, saves, personal settings and the existing warm cache are preserved. Unit tests currently
+pass (4): native controls/remapping/file preservation/frame-serial history, existing
+scale/launcher precedence, renderer-option validation and restart sequencing.
+Full candidate compile/link succeeded. All 5 existing uninstaller tests also passed.
+Core/synchronization validation with FPS details + frame cap 1 reached 180 game
+frames/180 presentations and logged zero validation errors, but the overall 240s
+limit expired during shutdown. This is NOT a clean-exit pass. The large existing
+cache prelinked 8934/8935 pipelines in ~115s under validation before the first batch;
+subsequent boot work consumed most of the time budget. Log explicitly skipped driver
+cache rewrite at exit (zero creations added). Existing warm driver-cache backup is
+under build/nvn-settings-menu/cache-before-tests. Subsequent bounded checks use the
+candidate's own cache and longer deadline. Do not infer a performance win from this
+startup-only validation. The user subsequently reported that settings and a match work
+(see manual review below).
+
+Additional results: the separate fresh-cache FIFO + frame cap 2 + FPS details run
+completed120 frames/120 presentations, 0 Vulkan call failures, clean shutdown.
+Initial shader compilation before frame1 was costly (~200s), not a frame-cap hang.
+The same candidate cache then passed120 frames with core+sync validation, frame cap3,
+immediate presentation and FPS details: 0 validation messages, 0 Vulkan failures,
+clean shutdown (14.4s after the initial3s grace period). Native control test reran
+successfully after limiting dead zones to the input runtime's actual0..50% range
+and fitting the extra window to monitor work area/DPI. Launcher tests include
+case-normalized developer overrides and continue to pass. A final tiny staging
+fix prevents FPS-only text from being counted as shader-progress frames; rebuilt
+Vulkan unit/relinked candidate. Final defaults (FPS0, queue0, Auto presentation,
+Auto GPU) passed120 frames/120 presentations, 0 Vulkan failures, clean shutdown.
+No new battle performance/stability claim follows from these startup runs.
+
+Promoted the tested executable/dependencies/map/provenance/licenses to the normal
+build/nvn-opensmash-port output; normal Play BAT now uses the expanded menu. Kept
+rollback-before-menu-20261108-115120 there, with the old executable hash verified
+before promotion. New executable hash matches candidate. Six personal settings
+files (server/name/direct/display/controllers/NVN graphics) were hash-verified
+unchanged. No cache/save directories copied or removed. Existing driver-cache
+file and its safety backup hashes matched after tests. Previous rollbacks retained.
+Launched normal build PID23200 with LogTag menu-review, Online mode and saved0.5scale.
+User asked to review Esc -> More settings (physical pad remap/rumble/window/save/
+restart/match). On 2026-11-08 the user answered "Settings and match work."
+Record this as successful user-reported manual testing of the expanded menu and a
+match, not a controlled FPS benchmark or qualification of every device/preset.
+No specific fault was reported in that review. The user then authorized publication.
+README now covers prerequisites, download/install, graphics, controllers, public/
+private/custom/hosted lobbies, updating/uninstalling, limitations and contribution
+links. Source/menu/tests and docs are included in the publication; no new test BATs.
+online_server.txt remains the preexisting personal modification and must not be
+staged. Game inputs/outputs, binaries, caches, settings and raw logs remain local.
+Use Git/remote status to verify the resulting publication commit; the local archive
+records its ID after the push.
+
+
 
 ## Current objective
 
@@ -82,7 +164,7 @@ compiled objects, shader caches or log conclusions.
 | Laptop 1, original development PC | Intel Core i5-1240P, Iris Xe, 16 GB RAM | Earlier reduced-resolution play was smooth; full resolution has variable performance and unresolved device loss. |
 | Laptop 2, AMD development PC | AMD Ryzen 7 PRO 8840HS, Radeon 780M, 32 GB RAM | Warm-cache full-resolution logs are near 60 FPS; user now reports successful play even at 4K. First-use shader hitches remain possible. |
 
-- Public-server ICMP round trips were roughly 242–321 ms. These measurements
+- Public-server ICMP round trips were roughly 242â€“321 ms. These measurements
   describe the public host, not the actual direct peer path during a match.
 - A local Online server worked: the user successfully matched the two laptops.
 - Connecting the laptops directly by Ethernet improved online play substantially,
@@ -117,7 +199,7 @@ symptom. Average 60 FPS does not rule out uneven frame timing or simulation stal
    messages and any errors. Distinguish battle windows from menus, loading and
    victory screens. One laptop's logs cannot establish the other's behavior.
 4. If needed, use the AGENTS.md fixed Training scene: Mario vs Mario on normal
-   Battlefield, speed 1×, CPU Stop, both at 0%, menu closed. Repeat with the
+   Battlefield, speed 1Ã—, CPU Stop, both at 0%, menu closed. Repeat with the
    existing cache warm. Test moving/attacking separately from that stationary
    baseline, rather than mixing both workloads into one comparison.
 5. Compare spikes with shader/pipeline work. If warmed offline play still

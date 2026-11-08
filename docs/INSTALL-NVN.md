@@ -39,6 +39,46 @@ selection does not resize live GPU resources. Resolution is saved locally in
 `nvn_graphics.ini`; rebuilding preserves it. Developer `-ResolutionScale` arguments
 override this setting for that run. Online settings have their own save button.
 
+### Display, controllers and game actions
+
+**Esc → More settings…** opens three pages:
+
+- **Display:** windowed/borderless/fullscreen, window size, idle cursor hiding,
+  Vulkan presentation mode, usable Vulkan GPU, FPS text/details, and an optional
+  GPU frame-ahead cap. Save applies window mode, cursor and FPS immediately;
+  window size, GPU, presentation and queue changes need a restart.
+- **Controllers:** choose a connected pad; assign its player; choose positional
+  or printed face buttons; adjust stick dead zone, rumble strength and trigger
+  threshold; choose the keyboard player and background-input/global-rumble options.
+  Save applies through the existing input reload API. Player assignment may require
+  reconnecting. XInput fallback uses fixed player indices.
+- **Game:** restart after cache saving, or quit, with confirmation before ending
+  a match. The main Online/resolution window remains available via Back.
+
+To remap, select a game button and click **Capture input**, release held controls,
+then press a pad button or trigger within ten seconds. Esc cancels capture.
+**Default binding** removes that override; **Reset selected controller** removes
+its layout/dead-zone/rumble/trigger/button overrides. Other settings remain.
+Custom stick-axis or multiple-input bindings remain editable in `controllers.ini`.
+
+**F1** toggles the FPS text; **F2** adds presentation-interval details. These are
+CPU-observed intervals between presentation calls, not GPU execution timings.
+The overlay is drawn through the existing Vulkan text path. Hotkey changes are
+temporary unless saved in Display. **F11 / Alt+Enter** switches fullscreen.
+
+The game retains its existing 60 Hz simulation clock. The presentation menu
+requests Auto/Mailbox/FIFO/Immediate; the backend logs a fallback if the surface
+does not support a requested mode. FIFO follows monitor refresh and can add
+latency/stutter on mismatched displays. The optional **1–3 GPU frame-ahead cap**
+waits for existing frame-submission fences; it is not a swapchain-image count or
+the old Direct3D frame queue. **Backend default** preserves existing behavior.
+These settings are preferences, not guaranteed performance improvements.
+
+Renderer preferences share `nvn_graphics.ini`; window preferences use
+`display.ini`; input preferences use `controllers.ini`. Rebuilds preserve all three.
+Restart uses the current build/cache directories and saved settings, waits for
+the old process to exit, and refuses to overlap cache writers.
+
 If setup stops, read **install-nvn.log**, correct the reported problem and run
 the same installer again. Runtime compiler/linker logs are under
 `build/nvn-opensmash-port/`. A successful rebuild saves the previous executable

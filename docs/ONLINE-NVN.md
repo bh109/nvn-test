@@ -1,13 +1,13 @@
 # Online settings and a nearby lobby
 
 In the NVN build, press **Esc** to open the native **Online settings** window.
-This restores networking controls independently of the GPU overlay. The original
-DirectX graphics/debug pages are not available in this panel. Game input is
+This restores networking controls independently of the GPU overlay. Display/controller/game controls are under **More settings…**; these use the NVN
+implementation rather than the original DirectX overlay pages. Game input is
 blocked while the panel is open; the game and network continue running.
 
 The panel shows the current lobby connection, its ping and (while matched) each
 introduced peer's `direct ... ms` or `relayed` status. Change the lobby address,
-player name or direct-connections checkbox, click **Save for next start**, then
+player name or direct-connections checkbox, click **Save Online settings**, then
 close and reopen the game. Saving does not move an active match to another server.
 Direct peer connections disclose your IP address to matched peers; disabling
 them routes match traffic through the lobby instead.

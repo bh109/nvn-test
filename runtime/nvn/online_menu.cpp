@@ -2,6 +2,7 @@
 #include "online_menu.h"
 #include "online_settings.h"
 #include "graphics_settings.h"
+#include "settings_controls.h"
 #include <shellapi.h>
 #include <cstdio>
 #include <cstdlib>
@@ -20,7 +21,7 @@ std::string custom_server;
 HFONT font;
 UINT dpi=96;
 volatile LONG opened;
-enum { SAVE=100, SERVER_MODE, HOST_SERVER, SAVE_RESOLUTION };
+enum { SAVE=100, SERVER_MODE, HOST_SERVER, SAVE_RESOLUTION, MORE_SETTINGS };
 const char *public_server="smash.recomps.wtf:39421";
 HWND control(const char *kind,const char *label,DWORD style,int x,int y,int w,int h,int id=0) {
     HWND item=CreateWindowExA(0,kind,label,WS_CHILD|WS_VISIBLE|style,MulDiv(x,dpi,96),MulDiv(y,dpi,96),MulDiv(w,dpi,96),MulDiv(h,dpi,96),panel,
@@ -157,6 +158,7 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
         resolution_status=control("STATIC","",0,18,465,590,20);
         control("STATIC","Higher resolution is sharper and uses more GPU time and memory.\nResolution changes apply after closing and reopening the game.",0,18,491,590,38);
         control("BUTTON","Save Online settings",BS_DEFPUSHBUTTON|WS_TABSTOP,18,545,270,30,SAVE);
+        control("BUTTON","More settings...",WS_TABSTOP,300,545,160,30,MORE_SETTINGS);
         control("BUTTON","Close",WS_TABSTOP,470,545,138,30,IDCANCEL);
         load_settings();refresh_status();SetTimer(h,1,1000,nullptr);return 0;
     case WM_TIMER: if(nvn_online_menu_open())refresh_status();return 0;
@@ -166,9 +168,10 @@ LRESULT CALLBACK procedure(HWND h,UINT message,WPARAM w,LPARAM l) {
         case SERVER_MODE: if(HIWORD(w)==CBN_SELCHANGE)change_server_mode();break;
         case HOST_SERVER: start_server();break;
         case SAVE_RESOLUTION: save_resolution();break;
+        case MORE_SETTINGS: nvn_settings_open(h);break;
         case IDCANCEL: SendMessageW(h,WM_CLOSE,0,0);break;
         }return 0;
-    case WM_CLOSE: ShowWindow(h,SW_HIDE);InterlockedExchange(&opened,0);SetForegroundWindow(GetWindow(h,GW_OWNER));return 0;
+    case WM_CLOSE: nvn_settings_close();ShowWindow(h,SW_HIDE);InterlockedExchange(&opened,0);SetForegroundWindow(GetWindow(h,GW_OWNER));return 0;
     case WM_DESTROY: KillTimer(h,1);if(font){DeleteObject(font);font=nullptr;}panel=nullptr;InterlockedExchange(&opened,0);return 0;
     }
     return DefWindowProcW(h,message,w,l);
@@ -190,4 +193,4 @@ void nvn_online_menu_toggle(HWND owner) {
     fprintf(stderr,"[NVN online] Online settings opened\n");
 }
 int nvn_online_menu_open(){return InterlockedCompareExchange(&opened,0,0)!=0;}
-int nvn_online_menu_message(MSG *message){return nvn_online_menu_open()&&IsDialogMessageW(panel,message);}
+int nvn_online_menu_message(MSG *message){return nvn_settings_message(message)||(nvn_online_menu_open()&&IsDialogMessageW(panel,message));}

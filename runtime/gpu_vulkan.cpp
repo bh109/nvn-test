@@ -31,6 +31,7 @@ int gfx_native_toggle_instance_batch(void);
 #ifdef SSBU_OPENSMASH_PORT
 #include "nvn/port_runtime.h"
 #include "nvn/online_menu.h"
+#include "nvn/settings_controls.h"
 #endif
 
 using namespace nativevk;
@@ -202,6 +203,9 @@ static LRESULT CALLBACK procedure(HWND h,UINT msg,WPARAM w,LPARAM l){
 #ifdef SSBU_OPENSMASH_PORT
     if(opensmash_port_selected() && (msg==WM_APP+77 || (msg==WM_KEYDOWN && w==VK_ESCAPE && !(l&(1<<30))))){nvn_online_menu_toggle(h);return 0;}
 #endif
+    #ifdef SSBU_OPENSMASH_PORT
+    if(opensmash_port_selected() && msg==WM_KEYDOWN && (w==VK_F1||w==VK_F2) && !(l&(1<<30))){nvn_settings_hotkey((int)w);return 0;}
+    #endif
     LRESULT result;if(display_message(h,msg,w,l,&result))return result;
     if(msg==WM_CLOSE){fprintf(stderr,"[native Vulkan] window closed\n");gfx_closing();fflush(stderr);ExitProcess(0);}
     if(msg==WM_KEYDOWN&&w>=VK_F1&&w<=VK_F6&&!(l&(1<<30)))InterlockedOr(&keys,1<<(w-VK_F1));

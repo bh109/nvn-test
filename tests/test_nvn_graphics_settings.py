@@ -8,6 +8,54 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class GraphicsSettingsTest(unittest.TestCase):
+    def test_renderer_options_and_restart_wait(self):
+        with tempfile.TemporaryDirectory(prefix='nvn renderer launch ') as folder:
+            work = pathlib.Path(folder)
+            (work / 'tools').mkdir()
+            for name in ('Run-NvnGame.ps1', 'Restart-NvnGame.ps1'):
+                shutil.copy2(ROOT / 'tools' / name, work / 'tools')
+            build = work / 'build/nvn-opensmash-port'
+            build.mkdir(parents=True)
+            (build / 'ssbu-nvn-vulkan.exe').touch()
+            (build / 'graphics.ini').write_text('keep graphics\n')
+            check = r'''
+$ErrorActionPreference='Stop'
+$global:options=[Collections.Generic.List[string]]::new()
+function Get-Process {param($Name,$Id)
+    if($Id){$p=[pscustomobject]@{}; $p|Add-Member ScriptMethod WaitForExit {param($ms) $global:waited=$ms;return $global:canExit};return $p}
+}
+function Start-Process {
+    param($FilePath,$ArgumentList,$WorkingDirectory,[switch]$NoNewWindow,[switch]$PassThru,$RedirectStandardOutput,$RedirectStandardError)
+    $global:options.Add("$env:SSBU_VK_DEVICE/$env:SSBU_VK_PRESENT/$env:SSBU_NVN_FPS/$env:SSBU_NVN_FRAME_QUEUE")
+    [pscustomobject]@{Id=123;Handle=0}
+}
+$env:SSBU_VK_DEVICE='inherited';$env:SSBU_VK_PRESENT='inherited'
+& '.\tools\Run-NvnGame.ps1' -Live
+'gpu=auto','present=auto','fps_overlay=2','frame_queue=3'|Set-Content nvn_graphics.ini
+& '.\tools\Run-NvnGame.ps1' -Live
+'gpu=15','present=fifo','fps_overlay=1','frame_queue=1'|Set-Content nvn_graphics.ini
+& '.\tools\Run-NvnGame.ps1' -Live
+'gpu=16','present=bogus','fps_overlay=-1','frame_queue=4'|Set-Content nvn_graphics.ini
+& '.\tools\Run-NvnGame.ps1' -Live
+& '.\tools\Run-NvnGame.ps1' -Live -GpuIndex -1 -PresentMode IMMEDIATE -FpsOverlay 2 -FrameQueue 2
+if(($global:options -join ',') -ne '0/mailbox/0/0,-1//2/3,15/fifo/1/1,0/mailbox/0/0,-1/immediate/2/2'){throw 'Renderer option validation failed'}
+if($env:SSBU_VK_DEVICE -ne 'inherited' -or $env:SSBU_VK_PRESENT -ne 'inherited'){throw 'Environment not restored'}
+# A restart must refuse to open another game while the old process is alive.
+$global:canExit=$false
+try { & '.\tools\Restart-NvnGame.ps1' -GameProcessId 123 -BuildDirectory 'build\nvn-opensmash-port';throw 'Expected timeout' }
+catch {if($_ -notlike '*old game has not closed*'){throw}}
+if($global:options.Count -ne 5 -or $global:waited -ne 120000){throw 'Restart did not wait safely'}
+$global:canExit=$true
+& '.\tools\Restart-NvnGame.ps1' -GameProcessId 123 -BuildDirectory 'build\nvn-opensmash-port' -Online
+if($global:options.Count -ne 6){throw 'Restart did not launch after exit'}
+'''
+            (work / 'check.ps1').write_text(check)
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+                                     '-File', str(work / 'check.ps1')], cwd=work,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual((build / 'graphics.ini').read_text(), 'keep graphics\n')
+
     def test_scale_validation(self):
         compiler = ROOT / 'deps/llvm/bin/clang-cl.exe'
         if not compiler.is_file():

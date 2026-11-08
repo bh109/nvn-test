@@ -44,7 +44,7 @@ try{
     foreach($name in @('nvn_stub','nvn_gl','nvn_vk','nvn_c4','nvn_c5','nvn_sdk','mx_translate','tex_decode','gfx_options')){
         $new+=Compile-Unit "upstream_$name" "$source\$name.c" (@('/TC')+$defines)
     }
-    foreach($name in @('bridge','host_adapter','display_adapter','present_clock','optional_adapter','port_runtime','online_menu')){
+    foreach($name in @('bridge','host_adapter','display_adapter','present_clock','optional_adapter','port_runtime','online_menu','settings_controls')){
         $new+=Compile-Unit "port_$name" "$root\runtime\nvn\$name.cpp" @('/std:c++17','/EHsc','/DSSBU_OPENSMASH_PORT')
     }
     # gpu_vulkan retains guarded legacy entry points. Compile their support from
