@@ -7,6 +7,11 @@ keeping WindowSmash's game runtime and networking, including its existing public
 and a temporary alternative for people encountering graphics issues. Consider the
 original projects' future fixes and releases; regular updates/support aren't guaranteed.
 
+![Before and after rendering comparison: missing menu graphics, broken victory-screen textures and a large diagonal band on the left; improved NVN Vulkan rendering on the right.](docs/images/rendering-comparison.png)
+
+*Examples from the Intel Iris Xe development laptop. These show rendering differences,
+not an FPS benchmark or a guarantee for every GPU.*
+
 ## 1. What you need
 
 - A 64-bit Windows PC, an **AVX2-capable CPU**, and a GPU/driver supporting **Vulkan 1.3**.

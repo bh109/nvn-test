@@ -6,6 +6,13 @@ archive on the original developer laptop; it is not required on another PC.
 Update this document after meaningful changes, preserving the distinction between
 reported observations, measured evidence and untested hypotheses.
 
+## README rendering comparison (2026-11-08)
+
+User supplied a before/after collage for the README. Copied it unchanged into
+`docs/images/rendering-comparison.png` and embedded it below the introduction.
+It illustrates Intel rendering differences, not an FPS benchmark or a guarantee
+across GPUs. The original image remains untouched. No build/game/settings changes.
+
 ## Latest implementation: expanded Esc settings (2026-11-08)
 
 User requested original-menu features before community release. Local implementation
